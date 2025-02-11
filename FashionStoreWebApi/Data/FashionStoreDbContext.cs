@@ -1,10 +1,14 @@
 ﻿using FashionStoreWebApi.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace FashionStoreWebApi.Data
 {
-    public class FashionStoreDbContext : IdentityDbContext<User>
+    public class FashionStoreDbContext : IdentityDbContext<User, Role, string, 
+        IdentityUserClaim<string>, IdentityUserRole<string>, 
+        IdentityUserLogin<string>, IdentityRoleClaim<string>, 
+        IdentityUserToken<string>>
     {
 
         public FashionStoreDbContext(DbContextOptions<FashionStoreDbContext> options) : base(options)
@@ -108,25 +112,27 @@ namespace FashionStoreWebApi.Data
                         .Property(f => f.Id)
                         .ValueGeneratedOnAdd();
             modelBuilder.Entity<Cart>()
-            .Property(f => f.Id)
-            .ValueGeneratedOnAdd();
+                        .Property(f => f.Id)
+                        .ValueGeneratedOnAdd();
             modelBuilder.Entity<Category>()
-            .Property(f => f.Id)
-            .ValueGeneratedOnAdd();
+                        .Property(f => f.Id)
+                        .ValueGeneratedOnAdd();
             modelBuilder.Entity<Order>()
-            .Property(f => f.Id)
-            .ValueGeneratedOnAdd();
+                        .Property(f => f.Id)
+                        .ValueGeneratedOnAdd();
             modelBuilder.Entity<OrderItem>()
-            .Property(f => f.Id)
-            .ValueGeneratedOnAdd();
+                        .Property(f => f.Id)
+                        .ValueGeneratedOnAdd();
             modelBuilder.Entity<Payment>()
-            .Property(f => f.Id)
-            .ValueGeneratedOnAdd();
+                        .Property(f => f.Id)
+                        .ValueGeneratedOnAdd();
             modelBuilder.Entity<Product>()
-            .Property(f => f.Id)
-            .ValueGeneratedOnAdd();
+                        .Property(f => f.Id)
+                        .ValueGeneratedOnAdd();
         }
 
+        public DbSet<User> Users { get; set; }
+        public DbSet<Role> Roles { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Brand> Brands { get; set; }

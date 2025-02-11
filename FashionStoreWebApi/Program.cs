@@ -1,5 +1,6 @@
 using FashionStoreWebApi.Data;
 using FashionStoreWebApi.Models;
+using FashionStoreWebApi.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,7 +15,11 @@ builder.Services.AddDbContext<FashionStoreDbContext>(options =>
 builder.Services.AddAuthorization();
 
 builder.Services.AddIdentityApiEndpoints<User>()
+    .AddRoles<Role>()
     .AddEntityFrameworkStores<FashionStoreDbContext>();
+
+builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
