@@ -1,0 +1,88 @@
+# .gitignore for Visual Studio and ASP.NET Core projects
+
+###############################
+# Visual Studio & IDE files   #
+###############################
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.csproj.user
+*.userprefs
+
+# Build results and intermediate files
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]eleases/
+[Rr]eleasesPublic/
+x64/
+x86/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio temporary and cache directories
+.vs/
+.vscode/
+
+###############################
+# ASP.NET Core specific files #
+###############################
+
+# .NET Core/ASP.NET Core lock and artifact files
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET Core scaffolding (if used)
+ScaffoldingReadMe.txt
+
+###############################
+# NuGet and Package Restore   #
+###############################
+
+# NuGet package files (do not check in packages – they can be restored)
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+**/packages/*
+!**/packages/build/
+
+###############################
+# Front-end dependencies      #
+###############################
+
+# Node modules (if using client-side package managers)
+node_modules/
+
+###############################
+# Optional: Local DB files    #
+###############################
+
+# Uncomment these if you use local databases (e.g. for development)
+# *.mdf
+# *.ldf
+
+###############################
+# General OS & Backup files   #
+###############################
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Backup and temporary files
+*~
+*.bak
+*.tmp
