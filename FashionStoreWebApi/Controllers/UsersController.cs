@@ -31,6 +31,12 @@ namespace FashionStoreWebApi.Controllers
             return Ok(await _userService.CreateUserAsync(userCreation));
         }
 
+        [HttpPut("{userId}")]
+        public async Task<IActionResult> UpdateUser(string userId, [FromBody] UserCreationDTO userCreation)
+        {
+            return Ok(await _userService.CreateUserAsync(userCreation));
+        }
+
         [HttpDelete("{userId}")]
         public async Task<IActionResult> DeleteUser(string userId)
         {

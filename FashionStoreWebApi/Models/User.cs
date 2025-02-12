@@ -17,6 +17,10 @@ namespace FashionStoreWebApi.Models
 
         [PersonalData]
         public string FullName { get; set; }
+        [PersonalData]
+        public string FirstName { get; set; }
+        [PersonalData]
+        public string LastName { get; set; }
         public IList<Order> Orders { get; set; }
         public IList<Cart> CartItems { get; set; }
     }
