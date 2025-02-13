@@ -1,4 +1,6 @@
-﻿using FashionStoreWebApi.Models;
+﻿using System.Security.Claims;
+using FashionStoreWebApi.Data;
+using FashionStoreWebApi.Models;
 using FashionStoreWebApi.Models.DTOs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -8,10 +10,12 @@ namespace FashionStoreWebApi.Services
     public class RoleService : IRoleService
     {
         private readonly RoleManager<Role> _roleManager;
+        private readonly FashionStoreDbContext _context;
 
-        public RoleService(RoleManager<Role> roleManager)
+        public RoleService(RoleManager<Role> roleManager, FashionStoreDbContext context)
         {
             _roleManager = roleManager;
+            _context = context;
         }
 
         public async Task<RoleVm> AddRoleAsync(string role)

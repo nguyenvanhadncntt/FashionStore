@@ -19,6 +19,7 @@ namespace FashionStoreWebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetRoles()
         {
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             return Ok(await _roleService.GetRolesAsync());
         }
 

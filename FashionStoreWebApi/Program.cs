@@ -2,6 +2,7 @@ using FashionStoreWebApi.Data;
 using FashionStoreWebApi.Models;
 using FashionStoreWebApi.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,18 @@ builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+builder.Services.AddSwaggerGen(option =>
+{
+    option.AddSecurityDefinition("oauth2", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey
+    });
+    option.OperationFilter<SecurityRequirementsOperationFilter>();
+});
+
 
 var app = builder.Build();
 
