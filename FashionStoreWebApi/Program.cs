@@ -3,6 +3,7 @@ using FashionStoreWebApi.Models;
 using FashionStoreWebApi.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +13,6 @@ builder.Services.AddDbContext<FashionStoreDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-builder.Services.AddAuthorization();
 
 builder.Services.AddIdentityApiEndpoints<User>()
     .AddRoles<Role>()
@@ -24,6 +24,7 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
+builder.Services.AddScoped<ICartService, CartService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -40,6 +41,7 @@ builder.Services.AddSwaggerGen(option =>
     option.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 

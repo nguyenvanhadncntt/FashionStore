@@ -1,5 +1,7 @@
-﻿using FashionStoreWebApi.Models.DTOs;
+﻿using System.Security.Claims;
+using FashionStoreWebApi.Models.DTOs;
 using FashionStoreWebApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,7 +21,6 @@ namespace FashionStoreWebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetRoles()
         {
-            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             return Ok(await _roleService.GetRolesAsync());
         }
 

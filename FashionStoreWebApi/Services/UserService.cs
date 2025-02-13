@@ -17,15 +17,7 @@ namespace FashionStoreWebApi.Services
 
         public async Task<IdentityResult> CreateUserAsync(UserCreationDTO userCreation)
         {
-            // Create the user
-            User user = new User
-            {
-                UserName = userCreation.UserName,
-                Email = userCreation.Email,
-
-                FullName = userCreation.FirstName + " " + userCreation.LastName,
-                PhoneNumber = userCreation.PhoneNumber,
-            };
+            User user = ConvertToUserEntity(userCreation);
             await _userManager.CreateAsync(user, userCreation.Password);
 
             // Check the role is existing
@@ -35,6 +27,20 @@ namespace FashionStoreWebApi.Services
             }
 
             return await _userManager.AddToRoleAsync(user, userCreation.Role);
+        }
+
+        private static User ConvertToUserEntity(UserCreationDTO userCreation)
+        {
+            // Create the user
+            return new User
+            {
+                UserName = userCreation.UserName,
+                Email = userCreation.Email,
+                FirstName = userCreation.FirstName,
+                LastName = userCreation.LastName,
+                FullName = userCreation.FirstName + " " + userCreation.LastName,
+                PhoneNumber = userCreation.PhoneNumber,
+            };
         }
 
         public async Task<IdentityResult> DeleteUserAsync(string userId)

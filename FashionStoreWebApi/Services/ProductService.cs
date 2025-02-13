@@ -1,4 +1,5 @@
-﻿using FashionStoreWebApi.Data;
+﻿using System.Globalization;
+using FashionStoreWebApi.Data;
 using FashionStoreWebApi.Models;
 using FashionStoreWebApi.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
@@ -83,9 +84,51 @@ namespace FashionStoreWebApi.Services
             };
         }
 
-        public Task<List<ProductVm>> GetProductsAsync()
+        public async Task<PagingData<ProductVm>> searchProductsAsync(ProductSearchRequest searchRequest, PagingRequest pagingRequest)
         {
-            throw new NotImplementedException();
+            var query = _dbContext.Products.AsQueryable();
+            if (!string.IsNullOrEmpty(searchRequest.name))
+            {
+                var productNameLower = searchRequest.name.ToLower();
+                query = query.Where(p => p.Name.ToLower().Contains(searchRequest.name));
+            }
+            if (searchRequest.categoryId != null && searchRequest.categoryId > 0)
+            {
+                query = query.Where(p => p.CategoryId == searchRequest.categoryId);
+            }
+            if (searchRequest.brandId != null && searchRequest.brandId > 0)
+            {
+                query = query.Where(p => p.BrandId == searchRequest.brandId);
+            }
+            if (pagingRequest.IsAscending)
+            {
+                query = query.OrderBy(p => EF.Property<object>(p, pagingRequest.SortBy ?? "Id"));
+            }
+            else
+            {
+                query = query.OrderByDescending(p => EF.Property<object>(p, pagingRequest.SortBy ?? "Id"));
+            }
+
+            var products = await query
+                .Include(c => c.Brand)
+                .Include(c => c.Category)
+                .Select(p => new ProductVm
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                Price = p.Price,
+                CategoryId = p.CategoryId,
+                BrandId = p.BrandId,
+                StockQuantity = p.StockQuantity,
+                ImageUrl = p.ImageUrl,
+                CreatedAt = p.CreatedAt,
+                UpdatedAt = p.UpdatedAt,
+                CategoryName = p.Category.Name,
+                BrandName = p.Brand.Name
+            }).ToListAsync();
+
+            return new PagingData<ProductVm>(products, products.Count, pagingRequest.PageNumber, pagingRequest.PageSize);
         }
 
         public async Task<ProductVm> UpdateProduct(ProductCreationDTO productDto)

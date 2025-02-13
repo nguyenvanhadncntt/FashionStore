@@ -45,7 +45,7 @@ namespace FashionStoreWebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> SearchCategories([FromQuery] string name)
         {
-            return Ok(await _categoryService.SearchByName(name));
+            return Ok(await _categoryService.SearchCategoriesByName(name));
         }
     }
 }

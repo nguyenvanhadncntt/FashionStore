@@ -1,6 +1,5 @@
 ﻿using FashionStoreWebApi.Models.DTOs;
 using FashionStoreWebApi.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FashionStoreWebApi.Controllers
@@ -16,9 +15,11 @@ namespace FashionStoreWebApi.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetProducts()
+        public async Task<IActionResult> searchProduct(
+            [FromQuery] ProductSearchRequest productSearchRequest, 
+            [FromQuery] PagingRequest pagingRequest)
         {
-            return Ok("Products Controller");
+            return Ok(await _productService.searchProductsAsync(productSearchRequest, pagingRequest));
         }
 
         [HttpGet("{productId}")]
