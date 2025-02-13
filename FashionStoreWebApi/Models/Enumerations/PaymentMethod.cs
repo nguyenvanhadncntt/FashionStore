@@ -2,6 +2,6 @@
 {
     public enum PaymentMethod
     {
-        COD, Paypal
+        COD
     }
 }
