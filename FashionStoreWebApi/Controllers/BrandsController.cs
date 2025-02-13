@@ -16,9 +16,11 @@ namespace FashionStoreWebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> SearchByName([FromQuery] string name)
+        public async Task<IActionResult> SearchByName(
+            [FromQuery] string name, 
+            [FromQuery] PagingRequest pagingRequest)
         {
-            return Ok(await _brandService.SearchByName(name));
+            return Ok(await _brandService.SearchByName(name, pagingRequest));
         }
 
         [HttpGet("{brandId}")]

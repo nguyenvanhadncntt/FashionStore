@@ -28,18 +28,28 @@ namespace FashionStoreWebApi.Services
             return brandVm;
         }
 
-        public async Task<IList<BrandVm>> SearchByName(string name)
+        public async Task<PagingData<BrandVm>> SearchByName(string name, PagingRequest pagingRequest)
         {
-            if (string.IsNullOrEmpty(name))
+            var query = _context.Brands.AsQueryable();
+            if (pagingRequest.IsAscending)
             {
-                return await _context.Brands.Select(b => ConvertToBrandVm(b)).ToListAsync();
+                query = query.OrderBy(p => EF.Property<object>(p, pagingRequest.SortBy ?? "Id"));
+            }
+            else
+            {
+                query = query.OrderByDescending(p => EF.Property<object>(p, pagingRequest.SortBy ?? "Id"));
+            }
+            if (!string.IsNullOrEmpty(name))
+            {
+                var lowerCaseName = name.ToLower();
+                query = query.Where(b => b.Name.ToLower().Contains(lowerCaseName));
             }
 
-            var lowerCaseName = name.ToLower();
-            return await _context.Brands
-                .Where(b => b.Name.ToLower().Contains(lowerCaseName))
+            var brands = await query
                 .Select(b => ConvertToBrandVm(b))
                 .ToListAsync();
+
+            return new PagingData<BrandVm>(brands, brands.Count, pagingRequest.PageNumber, pagingRequest.PageSize);
         }
 
         // Get brand by ID

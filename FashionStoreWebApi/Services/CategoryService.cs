@@ -69,17 +69,28 @@ namespace FashionStoreWebApi.Services
         }
 
         // Search categories by name (case-insensitive)
-        public async Task<IList<CategoryVm>> SearchCategoriesByName(string name)
+        public async Task<PagingData<CategoryVm>> SearchCategoriesByName(string name, PagingRequest pagingRequest)
         {
-            if (string.IsNullOrEmpty(name))
-                return await _context.Categories.Select(c => ConvertToCategoryVm(c)).ToListAsync();
+            var query = _context.Categories.AsQueryable();
+            if (pagingRequest.IsAscending)
+            {
+                query = query.OrderBy(p => EF.Property<object>(p, pagingRequest.SortBy ?? "Id"));
+            }
+            else
+            {
+                query = query.OrderByDescending(p => EF.Property<object>(p, pagingRequest.SortBy ?? "Id"));
+            }
+            if (!string.IsNullOrEmpty(name))
+            {
+                var lowerCaseName = name.ToLower();
+                query = query.Where(b => b.Name.ToLower().Contains(lowerCaseName));
+            }
 
-            // Perform case-insensitive search using ToLower()
-            var lowerCaseName = name.ToLower();
-            return await _context.Categories
-                .Where(c => c.Name.ToLower().Contains(lowerCaseName))
-                .Select(c => ConvertToCategoryVm(c))
+            var categories = await query
+                .Select(b => ConvertToCategoryVm(b))
                 .ToListAsync();
+
+            return new PagingData<CategoryVm>(categories, categories.Count, pagingRequest.PageNumber, pagingRequest.PageSize);
         }
 
         private CategoryVm ConvertToCategoryVm(Category? category)

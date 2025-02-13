@@ -25,7 +25,7 @@ namespace FashionStoreWebApi.Controllers
         }
 
         [HttpGet("{categoryId}")]
-        public async Task<IActionResult> GetCategoryById(int categoryId)
+        public async Task<IActionResult> GetCategoryById(long categoryId)
         {
             return Ok(await _categoryService.GetCategoryById(categoryId));
         }
@@ -37,15 +37,15 @@ namespace FashionStoreWebApi.Controllers
         }
 
         [HttpDelete("{categoryId}")]
-        public async Task<IActionResult> DeleteCategory(int categoryId)
+        public async Task<IActionResult> DeleteCategory(long categoryId)
         {
             return Ok(await _categoryService.DeleteCategoryAsync(categoryId));
         }
 
         [HttpGet]
-        public async Task<IActionResult> SearchCategories([FromQuery] string name)
+        public async Task<IActionResult> SearchCategories([FromQuery] string name, [FromQuery] PagingRequest pagingRequest)
         {
-            return Ok(await _categoryService.SearchCategoriesByName(name));
+            return Ok(await _categoryService.SearchCategoriesByName(name, pagingRequest));
         }
     }
 }
