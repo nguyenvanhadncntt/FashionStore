@@ -53,6 +53,8 @@ if (app.Environment.IsDevelopment())
     app.MapSwagger().RequireAuthorization();
 }
 
+app.UseStaticFiles();
+
 app.MapIdentityApi<User>();
 
 app.UseHttpsRedirection();

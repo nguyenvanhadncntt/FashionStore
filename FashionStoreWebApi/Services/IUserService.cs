@@ -6,10 +6,10 @@ namespace FashionStoreWebApi.Services
 {
     public interface IUserService
     {
-        // Create a new user
+        Task<PagingData<UserVm>> SearchUser(UserSearchRequest userSearch, PagingRequest pagingRequest);
         Task<IdentityResult> CreateUserAsync(UserCreationDTO user);
         Task<IdentityResult> UpdateUserAsync(string userId, UserCreationDTO user);
         Task<IdentityResult> DeleteUserAsync(string userId);
-        Task<UserCreationDTO> GetUserById(string userId);
+        Task<UserVm> GetUserById(string userId);
     }
 }

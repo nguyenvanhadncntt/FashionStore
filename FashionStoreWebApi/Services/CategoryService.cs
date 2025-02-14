@@ -1,4 +1,5 @@
 ﻿using FashionStoreWebApi.Data;
+using FashionStoreWebApi.Helpers;
 using FashionStoreWebApi.Models;
 using FashionStoreWebApi.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +25,7 @@ namespace FashionStoreWebApi.Services
             };
             _context.Categories.Add(category);
             await _context.SaveChangesAsync();
-            return ConvertToCategoryVm(category);
+            return ConvertVmHelper.ConvertToCategoryVm(category);
         }
 
         // Get all categories
@@ -41,7 +42,7 @@ namespace FashionStoreWebApi.Services
             {
                 throw new Exception("Category not found!");
             }
-            return ConvertToCategoryVm(category);
+            return ConvertVmHelper.ConvertToCategoryVm(category);
         }
 
         // Update category details
@@ -58,7 +59,7 @@ namespace FashionStoreWebApi.Services
 
             _context.Categories.Update(category);
             await _context.SaveChangesAsync();
-            return ConvertToCategoryVm(category);
+            return ConvertVmHelper.ConvertToCategoryVm(category);
         }
 
         // Delete category
@@ -74,11 +75,11 @@ namespace FashionStoreWebApi.Services
             var query = _context.Categories.AsQueryable();
             if (pagingRequest.IsAscending)
             {
-                query = query.OrderBy(p => EF.Property<object>(p, pagingRequest.SortBy ?? "Id"));
+                query = query.OrderBy(p => EF.Property<object>(p, pagingRequest.SortBy));
             }
             else
             {
-                query = query.OrderByDescending(p => EF.Property<object>(p, pagingRequest.SortBy ?? "Id"));
+                query = query.OrderByDescending(p => EF.Property<object>(p, pagingRequest.SortBy));
             }
             if (!string.IsNullOrEmpty(name))
             {
@@ -87,20 +88,10 @@ namespace FashionStoreWebApi.Services
             }
 
             var categories = await query
-                .Select(b => ConvertToCategoryVm(b))
+                .Select(b => ConvertVmHelper.ConvertToCategoryVm(b))
                 .ToListAsync();
 
             return new PagingData<CategoryVm>(categories, categories.Count, pagingRequest.PageNumber, pagingRequest.PageSize);
-        }
-
-        private CategoryVm ConvertToCategoryVm(Category? category)
-        {
-            return new CategoryVm
-            {
-                Id = category.Id,
-                Name = category.Name,
-                Description = category.Description
-            };
         }
     }
 }

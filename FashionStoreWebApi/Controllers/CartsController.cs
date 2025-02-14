@@ -1,11 +1,13 @@
 ﻿using System.Security.Claims;
 using FashionStoreWebApi.Models.DTOs;
 using FashionStoreWebApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FashionStoreWebApi.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class CartsController : ControllerBase
     {

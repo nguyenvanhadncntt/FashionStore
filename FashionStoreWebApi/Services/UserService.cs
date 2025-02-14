@@ -1,6 +1,8 @@
-﻿using FashionStoreWebApi.Models;
+﻿using System.Reflection.Metadata.Ecma335;
+using FashionStoreWebApi.Models;
 using FashionStoreWebApi.Models.DTOs;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace FashionStoreWebApi.Services
 {
@@ -52,13 +54,13 @@ namespace FashionStoreWebApi.Services
             return await _userManager.DeleteAsync(user);
         }
 
-        public async Task<UserCreationDTO> GetUserById(string userId)
+        public async Task<UserVm> GetUserById(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
                 throw new Exception("User not found.");
 
-            return new UserCreationDTO
+            return new UserVm
             {
                 Id = userId,
                 UserName = user.UserName,
@@ -109,8 +111,50 @@ namespace FashionStoreWebApi.Services
                 }
             }
             return await _userManager.UpdateAsync(user);
+        }
 
+        public async Task<PagingData<UserVm>> SearchUser(UserSearchRequest userSearch, PagingRequest pagingRequest)
+        {
+            var query = _userManager.Users.AsQueryable();
+            if (pagingRequest.IsAscending)
+            {
+                query = query.OrderBy(p => EF.Property<object>(p, pagingRequest.SortBy));
+            }
+            else
+            {
+                query = query.OrderByDescending(p => EF.Property<object>(p, pagingRequest.SortBy));
+            }
 
+            if (!string.IsNullOrEmpty(userSearch.Name))
+            {
+                query = query.Where(u => u.FullName.ToLower().Contains(userSearch.Name.ToLower()));
+            }
+
+            if (!string.IsNullOrEmpty(userSearch.Email))
+            {
+                query = query.Where(u => u.Email.ToLower().Contains(userSearch.Email.ToLower()));
+            }
+
+            var users = await query.ToListAsync();
+
+            var userVms = new List<UserVm>();
+            foreach (var user in users)
+            {
+                var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
+                userVms.Add(new UserVm
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    FullName = user.FullName,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Role = role
+                });
+            }
+
+            return new PagingData<UserVm>(userVms, userVms.Count, pagingRequest.PageNumber, pagingRequest.PageSize);
         }
     }
 }

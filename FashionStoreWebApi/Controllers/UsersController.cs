@@ -18,11 +18,16 @@ namespace FashionStoreWebApi.Controllers
         }
 
         [HttpGet]
-        public IActionResult searchUser(
+        public async Task<IActionResult> searchUser(
             [FromQuery] UserSearchRequest userSearchRequest, [FromQuery] PagingRequest pageRequest)
         {
-            var x = userSearchRequest.Email;
-            return Ok("User Controller");
+            return Ok(await _userService.SearchUser(userSearchRequest, pageRequest));
+        }
+
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetUser(string userId)
+        {
+            return Ok(await _userService.GetUserById(userId));
         }
 
         [HttpPost]

@@ -1,4 +1,5 @@
 ﻿using FashionStoreWebApi.Data;
+using FashionStoreWebApi.Helpers;
 using FashionStoreWebApi.Models;
 using FashionStoreWebApi.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
@@ -33,11 +34,11 @@ namespace FashionStoreWebApi.Services
             var query = _context.Brands.AsQueryable();
             if (pagingRequest.IsAscending)
             {
-                query = query.OrderBy(p => EF.Property<object>(p, pagingRequest.SortBy ?? "Id"));
+                query = query.OrderBy(p => EF.Property<object>(p, pagingRequest.SortBy));
             }
             else
             {
-                query = query.OrderByDescending(p => EF.Property<object>(p, pagingRequest.SortBy ?? "Id"));
+                query = query.OrderByDescending(p => EF.Property<object>(p, pagingRequest.SortBy));
             }
             if (!string.IsNullOrEmpty(name))
             {
@@ -46,7 +47,7 @@ namespace FashionStoreWebApi.Services
             }
 
             var brands = await query
-                .Select(b => ConvertToBrandVm(b))
+                .Select(b => ConvertVmHelper.ConvertToBrandVm(b))
                 .ToListAsync();
 
             return new PagingData<BrandVm>(brands, brands.Count, pagingRequest.PageNumber, pagingRequest.PageSize);
@@ -60,7 +61,7 @@ namespace FashionStoreWebApi.Services
             {
                 throw new Exception("Brand not found!");
             }
-            return ConvertToBrandVm(brand);
+            return ConvertVmHelper.ConvertToBrandVm(brand);
         }
 
         // Update brand details
@@ -75,7 +76,7 @@ namespace FashionStoreWebApi.Services
 
             _context.Brands.Update(brand);
             await _context.SaveChangesAsync();
-            return ConvertToBrandVm(brand);
+            return ConvertVmHelper.ConvertToBrandVm(brand);
         }
 
         // Delete brand
@@ -85,14 +86,5 @@ namespace FashionStoreWebApi.Services
             return await _context.SaveChangesAsync() > 0;
         }
 
-        private BrandVm ConvertToBrandVm(Brand? brand)
-        {
-            return new BrandVm
-            {
-                Id = brand.Id,
-                Name = brand.Name,
-                Description = brand.Description
-            };
-        }
     }
 }

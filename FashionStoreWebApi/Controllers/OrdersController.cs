@@ -2,11 +2,13 @@
 using FashionStoreWebApi.Models.DTOs;
 using FashionStoreWebApi.Models.Enumerations;
 using FashionStoreWebApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FashionStoreWebApi.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class OrdersController : ControllerBase
     {

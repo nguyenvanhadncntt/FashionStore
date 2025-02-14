@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FashionStoreWebApi.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize(Roles = "Admin")]
     [ApiController]
     public class RolesController : ControllerBase
     {

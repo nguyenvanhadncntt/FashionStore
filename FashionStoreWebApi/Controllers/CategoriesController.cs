@@ -30,7 +30,7 @@ namespace FashionStoreWebApi.Controllers
             return Ok(await _categoryService.GetCategoryById(categoryId));
         }
 
-        [HttpPut("{categoryId}")]
+        [HttpPut]
         public async Task<IActionResult> UpdateCategory([FromBody] CategoryVm updatedCategory)
         {
             return Ok(await _categoryService.UpdateCategoryAsync(updatedCategory));
@@ -43,7 +43,7 @@ namespace FashionStoreWebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> SearchCategories([FromQuery] string name, [FromQuery] PagingRequest pagingRequest)
+        public async Task<IActionResult> SearchCategories([FromQuery] string? name, [FromQuery] PagingRequest pagingRequest)
         {
             return Ok(await _categoryService.SearchCategoriesByName(name, pagingRequest));
         }

@@ -1,4 +1,5 @@
 ﻿using FashionStoreWebApi.Data;
+using FashionStoreWebApi.Helpers;
 using FashionStoreWebApi.Models;
 using FashionStoreWebApi.Models.DTOs;
 using FashionStoreWebApi.Models.Enumerations;
@@ -94,7 +95,7 @@ namespace FashionStoreWebApi.Services
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Product)
                 .FirstOrDefaultAsync(o => o.Id == orderId);
-            return convertToOrderVm(order);
+            return ConvertVmHelper.convertToOrderVm(order);
         }
 
         public async Task<IList<OrderVm>> GetMyOrdersAsync(string userId)
@@ -104,7 +105,7 @@ namespace FashionStoreWebApi.Services
                 .ThenInclude(oi => oi.Product)
                 .Where(o => o.UserId == userId)
                 .ToListAsync();
-            return orders.Select(o => convertToOrderVm(o)).ToList();
+            return orders.Select(o => ConvertVmHelper.convertToOrderVm(o)).ToList();
         }
 
         public async Task UpdateOrderStatusAsync(long orderId, OrderStatus status)
@@ -145,31 +146,11 @@ namespace FashionStoreWebApi.Services
             var orderVms = await _context.Orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Product)
-                .Select(o => convertToOrderVm(o))
+                .Select(o => ConvertVmHelper.convertToOrderVm(o))
                 .ToListAsync();
             return new PagingData<OrderVm>(orderVms, orderVms.Count, pagingRequest.PageNumber, pagingRequest.PageSize);
         }
 
-        private static OrderVm convertToOrderVm(Order? order)
-        {
-            return new OrderVm()
-            {
-                Id = order.Id,
-                OrderItems = order.OrderItems.Select(oi => new OrderItemVm
-                {
-                    ProductId = oi.ProductId,
-                    ProductName = oi.Product.Name,
-                    ProductImageUrl = oi.Product.ImageUrl,
-                    Quantity = oi.Quantity,
-                    Price = oi.Price
-                }).ToList(),
-                TotalAmount = order.TotalAmount,
-                Status = order.Status,
-                PaymentMethod = order.PaymentMethod,
-                PaymentStatus = order.PaymentStatus,
-                ShippingAddress = order.ShippingAddress,
-                CreatedAt = order.CreatedAt
-            };
-        }
+        
     }
 }

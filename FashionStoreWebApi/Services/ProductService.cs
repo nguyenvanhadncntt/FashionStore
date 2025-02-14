@@ -1,5 +1,5 @@
-﻿using System.Globalization;
-using FashionStoreWebApi.Data;
+﻿using FashionStoreWebApi.Data;
+using FashionStoreWebApi.Helpers;
 using FashionStoreWebApi.Models;
 using FashionStoreWebApi.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
@@ -45,19 +45,7 @@ namespace FashionStoreWebApi.Services
             await _dbContext.AddAsync(product);
             await _dbContext.SaveChangesAsync();
 
-            return new ProductVm
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                CategoryId = product.CategoryId,
-                BrandId = product.BrandId,
-                StockQuantity = product.StockQuantity,
-                ImageUrl = product.ImageUrl,
-                CreatedAt = product.CreatedAt,
-                UpdatedAt = product.UpdatedAt
-            };
+            return ConvertVmHelper.ConvertToProductVm(product);
         }
 
         public async Task<bool> DeleteProductAsync(long productId)
@@ -102,31 +90,17 @@ namespace FashionStoreWebApi.Services
             }
             if (pagingRequest.IsAscending)
             {
-                query = query.OrderBy(p => EF.Property<object>(p, pagingRequest.SortBy ?? "Id"));
+                query = query.OrderBy(p => EF.Property<object>(p, pagingRequest.SortBy));
             }
             else
             {
-                query = query.OrderByDescending(p => EF.Property<object>(p, pagingRequest.SortBy ?? "Id"));
+                query = query.OrderByDescending(p => EF.Property<object>(p, pagingRequest.SortBy));
             }
 
             var products = await query
                 .Include(c => c.Brand)
                 .Include(c => c.Category)
-                .Select(p => new ProductVm
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                Price = p.Price,
-                CategoryId = p.CategoryId,
-                BrandId = p.BrandId,
-                StockQuantity = p.StockQuantity,
-                ImageUrl = p.ImageUrl,
-                CreatedAt = p.CreatedAt,
-                UpdatedAt = p.UpdatedAt,
-                CategoryName = p.Category.Name,
-                BrandName = p.Brand.Name
-            }).ToListAsync();
+                .Select(p => ConvertVmHelper.ConvertToProductVm(p)).ToListAsync();
 
             return new PagingData<ProductVm>(products, products.Count, pagingRequest.PageNumber, pagingRequest.PageSize);
         }
@@ -163,19 +137,7 @@ namespace FashionStoreWebApi.Services
             _dbContext.Products.Update(product);
             await _dbContext.SaveChangesAsync();
 
-            return new ProductVm
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                CategoryId = product.CategoryId,
-                BrandId = product.BrandId,
-                StockQuantity = product.StockQuantity,
-                ImageUrl = product.ImageUrl,
-                CreatedAt = product.CreatedAt,
-                UpdatedAt = product.UpdatedAt
-            };
+            return ConvertVmHelper.ConvertToProductVm(product);
         }
     }
 }

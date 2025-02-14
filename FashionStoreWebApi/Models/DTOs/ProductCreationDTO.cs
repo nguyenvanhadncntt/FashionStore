@@ -9,9 +9,9 @@
         public long CategoryId { get; set; }
         public long BrandId { get; set; }
         public int StockQuantity { get; set; }
-        public string ImageUrl { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
-        public IFormFile Image;
+        public string? ImageUrl { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+        public IFormFile Image { get; set; }
     }
 }
