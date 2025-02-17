@@ -21,6 +21,7 @@
   <ItemGroup>
     <Folder Include="Exceptions\" />
     <Folder Include="wwwroot\" />
+    <Folder Include="wwwroot\images\products\" />
   </ItemGroup>
 
 </Project>

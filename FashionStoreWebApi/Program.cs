@@ -1,4 +1,5 @@
 using FashionStoreWebApi.Data;
+using FashionStoreWebApi.Helpers;
 using FashionStoreWebApi.Models;
 using FashionStoreWebApi.Services;
 using Microsoft.EntityFrameworkCore;
@@ -55,7 +56,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseStaticFiles();
 
-app.MapIdentityApi<User>();
+app.MapCustomIdentityApi<User>();
 
 app.UseHttpsRedirection();
 

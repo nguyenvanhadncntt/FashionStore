@@ -16,8 +16,6 @@ namespace FashionStoreWebApi.Models
         }
 
         [PersonalData]
-        public string FullName { get; set; }
-        [PersonalData]
         public string FirstName { get; set; }
         [PersonalData]
         public string LastName { get; set; }

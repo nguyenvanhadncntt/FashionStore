@@ -40,7 +40,6 @@ namespace FashionStoreWebApi.Services
                 Email = userCreation.Email,
                 FirstName = userCreation.FirstName,
                 LastName = userCreation.LastName,
-                FullName = userCreation.FirstName + " " + userCreation.LastName,
                 PhoneNumber = userCreation.PhoneNumber,
             };
         }
@@ -81,7 +80,8 @@ namespace FashionStoreWebApi.Services
             }
             user.UserName = userDto.UserName;
             user.Email = userDto.Email;
-            user.FullName = userDto.FirstName + " " + userDto.LastName;
+            user.FirstName = userDto.FirstName;
+            user.LastName = userDto.LastName;
             user.PhoneNumber = userDto.PhoneNumber;
 
             if (!string.IsNullOrEmpty(userDto.Password))
@@ -127,7 +127,9 @@ namespace FashionStoreWebApi.Services
 
             if (!string.IsNullOrEmpty(userSearch.Name))
             {
-                query = query.Where(u => u.FullName.ToLower().Contains(userSearch.Name.ToLower()));
+                query = query.Where(u => 
+                    (u.FirstName + " " + u.LastName).ToLower().Contains(userSearch.Name.ToLower())
+                );
             }
 
             if (!string.IsNullOrEmpty(userSearch.Email))
@@ -147,7 +149,6 @@ namespace FashionStoreWebApi.Services
                     UserName = user.UserName,
                     Email = user.Email,
                     PhoneNumber = user.PhoneNumber,
-                    FullName = user.FullName,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     Role = role

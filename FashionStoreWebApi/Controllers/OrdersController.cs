@@ -27,6 +27,7 @@ namespace FashionStoreWebApi.Controllers
             return Ok();
         }
 
+
         [HttpGet("{orderId}")]
         public async Task<IActionResult> GetOrderDetailAsync(long orderId)
         {
@@ -43,6 +44,7 @@ namespace FashionStoreWebApi.Controllers
             return Ok(orders);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetOrdersAsync([FromQuery] PagingRequest pagingRequest)
         {
@@ -50,6 +52,7 @@ namespace FashionStoreWebApi.Controllers
             return Ok(orders);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut]
         [Route("update-status/{orderId}/{status}")]
         public async Task<IActionResult> UpdateOrderStatusAsync(long orderId, OrderStatus status)
@@ -58,6 +61,7 @@ namespace FashionStoreWebApi.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{orderId}")]
         public async Task<IActionResult> DeleteOrderAsync(long orderId)
         {
@@ -65,6 +69,7 @@ namespace FashionStoreWebApi.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut]
         [Route("update-payment-status/{orderId}/{status}")]
         public async Task<IActionResult> UpdatePaymentStatusAsync(long orderId, PaymentStatus status)
