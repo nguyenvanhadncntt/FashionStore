@@ -31,20 +31,19 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-builder.Services.AddSwaggerGen(option =>
-{
-    option.AddSecurityDefinition("oauth2", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-    {
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey
-    });
-    option.OperationFilter<SecurityRequirementsOperationFilter>();
-});
-
 builder.Services.AddAuthorization();
 
+builder.Services.AddCors(option => option.AddPolicy("wasm",
+    policy => policy.WithOrigins(builder.Configuration["BackendUrl"] ?? "",
+    builder.Configuration["FrontendUrl"] ?? "")
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+    .AllowCredentials()
+));
+
 var app = builder.Build();
+
+app.UseCors("wasm");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

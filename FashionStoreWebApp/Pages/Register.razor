@@ -1,16 +1,117 @@
 ﻿@page "/register"
-@using Microsoft.AspNetCore.Components.Authorization;
+@using FashionStoreWebApp.Services
+@using FashionStoreViewModel;
+@using System.ComponentModel.DataAnnotations
+
+@inject IAccountManagementService accountService
 
 <AuthorizeView>
-	<Authorized>
-		<p>You are already registered.</p>
-	</Authorized>
-	<NotAuthorized>
-		<p>Register here.</p>
+    <Authorized>
+        <div class="alert alert-success">You're already logged in as @context.User.Identity?.Name</div>
+    </Authorized>
+    <NotAuthorized>
+        @if (success)
+        {
+            <div class="alert alert-success">You successfully registered. Now you can <a href="login">login</a>.</div>
+        }
+        else
+        {
+            if (hasErrors) {
+                foreach (var error in errorList)
+                {
+                    <div class="alert alert-danger">@error</div>
+                }
+            }
+            <div class="register-container">
+                <h2>Register</h2>
+                <EditForm id="registerForm" Model="user" OnValidSubmit="RegisterUser">
+                    <ChildContent Context="formContext">
+                        <DataAnnotationsValidator />
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email"
+                                   @bind-value="user.Email" placeholder="Enter your email" required>
+                            <ValidationMessage For="@(() => user.Email)" />
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password"
+                                   @bind-value="user.Password"
+                                   placeholder="Enter your password" required>
+                            <ValidationMessage For="@(() => user.Password)" />
+                        </div>
+
+                        <!-- Confirm password -->
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Confirm password</label>
+                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword"
+                                   @bind-value="confirmPassword" placeholder="Re-enter your password" required>
+                        </div>
+
+                        <!-- First Name -->
+                        <div class="mb-3">
+                            <label for="firstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="firstName" name="firstName"
+                                   @bind-value="user.FirstName" placeholder="Enter your first name" required>
+                            <ValidationMessage For="@(() => user.FirstName)" />
+                        </div>
+
+                        <!-- Last Name -->
+                        <div class="mb-3">
+                            <label for="lastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="lastName" name="lastName"
+                                   @bind-value="user.LastName" placeholder="Enter your last name" required>
+                            <ValidationMessage For="@(() => user.LastName)" />
+                        </div>
+
+                        <!-- Address -->
+                        <div class="mb-3">
+                            <label for="phoneNumber" class="form-label">Phone Number</label>
+                            <input type="text" class="form-control" id="phoneNumber" name="phoneNumber"
+                                   @bind-value="user.PhoneNumber" placeholder="Enter your phone number" required>
+                            <ValidationMessage For="@(() => user.PhoneNumber)" />
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary w-100">Register</button>
+                        </ChildContent>
+                    </EditForm>
+
+                    <p class="login-link">Already have an account? <a href="/login">Login here</a>.</p>
+                </div>
+        }
+        
 	</NotAuthorized>
 </AuthorizeView>
 
 
 @code {
+    private RegisterDTO user = new RegisterDTO();
+    private bool success, hasErrors;
+    private string[] errorList = [];
+	private string confirmPassword = string.Empty;
+
+	private async Task RegisterUser()
+	{
+		if (user.Password != confirmPassword)
+		{
+			errorList = new string[] { "Passwords do not match" };
+			hasErrors = true;
+			return;
+		}
+		var result = await accountService.RegisterAsync(user);
+		if (result.Succeeded)
+		{
+			success = true;
+		}
+		else
+		{
+			errorList = result.ErrorList;
+			hasErrors = true;
+		}
+	}
 
 }

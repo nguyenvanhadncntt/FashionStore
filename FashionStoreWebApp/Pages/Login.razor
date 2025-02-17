@@ -1,0 +1,84 @@
+﻿@page "/login"
+@using FashionStoreWebApp.Services
+
+@inject IAccountManagementService accountService
+<AuthorizeView>
+    <Authorized>
+        <div class="alert alert-success">You're logged in as @context.User.Identity?.Name.</div>
+    </Authorized>
+    <NotAuthorized>
+        @if (errors)
+        {
+            @foreach (var error in errorList)
+            {
+                <div class="alert alert-danger">@error</div>
+            }
+        }
+        <div class="login-container">
+            <h2>Login</h2>
+            <form id="loginForm" action="/api/User/login" method="POST">
+                <!-- Email -->
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email"
+                           @bind-value="email" placeholder="Enter your email" required>
+                </div>
+
+                <!-- Password -->
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password"
+                           @bind-value="password" placeholder="Enter your password" required>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="button" @onclick="LoginAsync" class="btn btn-primary w-100">Login</button>
+            </form>
+
+            <p class="register-link">Don't have an account? <a href="/register">Register here</a>.</p>
+        </div>
+
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private bool success, errors;
+    private string email = string.Empty;
+    private string password = string.Empty;
+    private string[] errorList = [];
+
+    public async Task LoginAsync()
+    {
+        success = errors = false;
+        errorList = [];
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            errors = true;
+            errorList = ["Email is required."];
+
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            errors = true;
+            errorList = ["Password is required."];
+
+            return;
+        }
+
+        var result = await accountService.LoginAsync(email, password);
+
+        if (result.Succeeded)
+        {
+            success = true;
+            email = password = string.Empty;
+        }
+        else
+        {
+            errors = true;
+            errorList = result.ErrorList;
+        }
+    }
+}

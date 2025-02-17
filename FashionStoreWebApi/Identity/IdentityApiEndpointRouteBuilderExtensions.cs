@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using FashionStoreViewModel;
 using FashionStoreWebApi.Models;
+using FashionStoreViewModel.Constants;
 
 namespace FashionStoreWebApi.Identity
 {
@@ -88,6 +89,8 @@ namespace FashionStoreWebApi.Identity
                 {
                     return CreateValidationProblem(result);
                 }
+
+                result = await userManager.AddToRoleAsync(user, RoleConstants.ROLE_USER);
 
                 await SendConfirmationEmailAsync(user, userManager, context, email);
                 return TypedResults.Ok();

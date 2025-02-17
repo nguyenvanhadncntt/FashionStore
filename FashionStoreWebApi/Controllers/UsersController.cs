@@ -29,6 +29,7 @@ namespace FashionStoreWebApi.Controllers
             return Ok(await _userService.SearchUser(userSearchRequest, pageRequest));
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetUser(string userId)
         {
@@ -73,7 +74,7 @@ namespace FashionStoreWebApi.Controllers
         }
 
         [Authorize]
-        [HttpPost("current-user")]
+        [HttpGet("current-user")]
         public async Task<IActionResult> GetCurrentUser()
         {
             var user = await _userService.GetUserById(User.FindFirstValue(ClaimTypes.NameIdentifier));

@@ -27,7 +27,7 @@ namespace FashionStoreWebApp.Services
 
             try
             {
-                var userResponse = await _httpClient.GetAsync("users/current-user");
+                var userResponse = await _httpClient.GetAsync("api/Users/current-user");
 
                 userResponse.EnsureSuccessStatusCode();
 
@@ -51,7 +51,7 @@ namespace FashionStoreWebApp.Services
             }
             catch (Exception ex)
             {
-                throw ex;
+                
             }
 
             return new AuthenticationState(user);
