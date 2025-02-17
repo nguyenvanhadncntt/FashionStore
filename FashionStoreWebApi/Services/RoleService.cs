@@ -1,7 +1,6 @@
-﻿using System.Security.Claims;
-using FashionStoreWebApi.Data;
+﻿using FashionStoreWebApi.Data;
 using FashionStoreWebApi.Models;
-using FashionStoreWebApi.Models.DTOs;
+using FashionStoreViewModel;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

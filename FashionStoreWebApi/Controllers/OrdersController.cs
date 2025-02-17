@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
-using FashionStoreWebApi.Models.DTOs;
-using FashionStoreWebApi.Models.Enumerations;
+using FashionStoreViewModel;
+using FashionStoreViewModel.Enumerations;
 using FashionStoreWebApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

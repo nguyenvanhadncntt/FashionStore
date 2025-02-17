@@ -1,8 +1,8 @@
-﻿using System.Reflection.Metadata.Ecma335;
-using FashionStoreWebApi.Models;
-using FashionStoreWebApi.Models.DTOs;
+﻿using FashionStoreWebApi.Models;
+using FashionStoreViewModel;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using FashionStoreWebApi.Helpers;
 
 namespace FashionStoreWebApi.Services
 {
@@ -19,7 +19,7 @@ namespace FashionStoreWebApi.Services
 
         public async Task<IdentityResult> CreateUserAsync(UserCreationDTO userCreation)
         {
-            User user = ConvertToUserEntity(userCreation);
+            User user = ConvertVmHelper.ConvertToUserEntity(userCreation);
             await _userManager.CreateAsync(user, userCreation.Password);
 
             // Check the role is existing
@@ -29,19 +29,6 @@ namespace FashionStoreWebApi.Services
             }
 
             return await _userManager.AddToRoleAsync(user, userCreation.Role);
-        }
-
-        private static User ConvertToUserEntity(UserCreationDTO userCreation)
-        {
-            // Create the user
-            return new User
-            {
-                UserName = userCreation.UserName,
-                Email = userCreation.Email,
-                FirstName = userCreation.FirstName,
-                LastName = userCreation.LastName,
-                PhoneNumber = userCreation.PhoneNumber,
-            };
         }
 
         public async Task<IdentityResult> DeleteUserAsync(string userId)
@@ -78,7 +65,7 @@ namespace FashionStoreWebApi.Services
             {
                 return IdentityResult.Failed(new IdentityError { Description = "User not found." });
             }
-            user.UserName = userDto.UserName;
+            user.UserName = userDto.Email;
             user.Email = userDto.Email;
             user.FirstName = userDto.FirstName;
             user.LastName = userDto.LastName;

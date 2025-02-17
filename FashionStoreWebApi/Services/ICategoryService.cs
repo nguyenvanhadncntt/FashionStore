@@ -1,4 +1,4 @@
-﻿using FashionStoreWebApi.Models.DTOs;
+﻿using FashionStoreViewModel;
 
 namespace FashionStoreWebApi.Services
 {

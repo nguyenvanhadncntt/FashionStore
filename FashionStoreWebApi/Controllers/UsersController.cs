@@ -1,7 +1,7 @@
-﻿using FashionStoreWebApi.Models.DTOs;
+﻿using FashionStoreViewModel;
+using FashionStoreWebApi.Models;
 using FashionStoreWebApi.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,10 +11,12 @@ namespace FashionStoreWebApi.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
+        private readonly SignInManager<User> _signInManager;
         private readonly IUserService _userService;
 
-        public UsersController(IUserService userService)
+        public UsersController(SignInManager<User> signInManager, IUserService userService)
         {
+            _signInManager = signInManager;
             _userService = userService;
         }
 
@@ -58,6 +60,15 @@ namespace FashionStoreWebApi.Controllers
             return BadRequest(result.Errors);
         }
 
-
+        [Authorize]
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout([FromBody] object empty)
+        {
+            if (empty is not null)
+            {
+                await _signInManager.SignOutAsync();
+            }
+            return Ok();
+        }
     }
 }

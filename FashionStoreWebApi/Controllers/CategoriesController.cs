@@ -1,8 +1,6 @@
-﻿using FashionStoreWebApi.Models;
-using FashionStoreWebApi.Models.DTOs;
+﻿using FashionStoreViewModel;
 using FashionStoreWebApi.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FashionStoreWebApi.Controllers

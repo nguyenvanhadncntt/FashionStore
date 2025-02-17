@@ -1,5 +1,6 @@
 ﻿using FashionStoreWebApi.Models.DTOs;
-using FashionStoreWebApi.Models.Enumerations;
+using FashionStoreViewModel.Enumerations;
+using FashionStoreViewModel;
 
 namespace FashionStoreWebApi.Services
 {

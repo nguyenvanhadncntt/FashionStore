@@ -1,4 +1,5 @@
-﻿using FashionStoreWebApi.Models.DTOs;
+﻿using FashionStoreViewModel;
+using FashionStoreWebApi.Models.DTOs;
 using FashionStoreWebApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

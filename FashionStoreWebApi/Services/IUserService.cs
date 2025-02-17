@@ -1,5 +1,5 @@
 ﻿using FashionStoreWebApi.Models;
-using FashionStoreWebApi.Models.DTOs;
+using FashionStoreViewModel;
 using Microsoft.AspNetCore.Identity;
 
 namespace FashionStoreWebApi.Services

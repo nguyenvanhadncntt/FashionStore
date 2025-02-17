@@ -1,5 +1,6 @@
 ﻿using FashionStoreWebApi.Models.DTOs;
 using FashionStoreWebApi.Models;
+using FashionStoreViewModel;
 
 namespace FashionStoreWebApi.Helpers
 {
@@ -63,6 +64,19 @@ namespace FashionStoreWebApi.Helpers
                 UpdatedAt = p.UpdatedAt,
                 CategoryName = p.Category.Name,
                 BrandName = p.Brand.Name
+            };
+        }
+
+        public static User ConvertToUserEntity(UserCreationDTO userCreation)
+        {
+            // Create the user
+            return new User
+            {
+                UserName = userCreation.Email,
+                Email = userCreation.Email,
+                FirstName = userCreation.FirstName,
+                LastName = userCreation.LastName,
+                PhoneNumber = userCreation.PhoneNumber,
             };
         }
     }

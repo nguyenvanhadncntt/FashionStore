@@ -1,4 +1,4 @@
-﻿using FashionStoreWebApi.Models.Enumerations;
+﻿using FashionStoreViewModel.Enumerations;
 
 namespace FashionStoreWebApi.Models
 {

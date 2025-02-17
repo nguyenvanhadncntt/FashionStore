@@ -1,7 +1,7 @@
-﻿using FashionStoreWebApi.Data;
+﻿using FashionStoreViewModel;
+using FashionStoreWebApi.Data;
 using FashionStoreWebApi.Helpers;
 using FashionStoreWebApi.Models;
-using FashionStoreWebApi.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace FashionStoreWebApi.Services
