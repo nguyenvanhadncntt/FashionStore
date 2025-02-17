@@ -1,0 +1,16 @@
+﻿@page "/register"
+@using Microsoft.AspNetCore.Components.Authorization;
+
+<AuthorizeView>
+	<Authorized>
+		<p>You are already registered.</p>
+	</Authorized>
+	<NotAuthorized>
+		<p>Register here.</p>
+	</NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+
+}

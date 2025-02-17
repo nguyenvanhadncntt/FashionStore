@@ -1,4 +1,5 @@
-﻿using FashionStoreViewModel;
+﻿using System.Security.Claims;
+using FashionStoreViewModel;
 using FashionStoreWebApi.Models;
 using FashionStoreWebApi.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -69,6 +70,14 @@ namespace FashionStoreWebApi.Controllers
                 await _signInManager.SignOutAsync();
             }
             return Ok();
+        }
+
+        [Authorize]
+        [HttpPost("current-user")]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var user = await _userService.GetUserById(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            return Ok(user);
         }
     }
 }
