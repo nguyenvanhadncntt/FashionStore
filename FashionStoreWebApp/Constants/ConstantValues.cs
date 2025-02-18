@@ -8,5 +8,7 @@ namespace FashionStoreWebApp.Constants
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         };
+
+        public static int NOTIFY_TIME_OUT = 3000;
     }
 }

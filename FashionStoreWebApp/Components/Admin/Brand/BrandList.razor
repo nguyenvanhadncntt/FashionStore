@@ -1,7 +1,12 @@
 ﻿@page "/brands"
 @using FashionStoreViewModel;
-@using FashionStoreWebApp.Services
+@using FashionStoreWebApp.Services;
+@using FashionStoreWebApp.Helpers;
+@using FashionStoreWebApp.Constants;
+@using ChangeEventArgs = Microsoft.AspNetCore.Components.ChangeEventArgs;
 
+
+@attribute [Authorize(Roles = "Admin")]
 @inject NavigationManager Navigation
 
 @inject IBrandService BrandService
@@ -9,10 +14,23 @@
 <h3>Brands</h3>
 
 <!-- Search Box -->
-<div class="mb-3">
-    <input type="text" class="form-control" placeholder="Search brands..." 
-        @bind="SearchQuery" @oninput="LoadBrands" />
+<div class="mb-3 row">
+    <div class="col-5">
+        <input type="text" class="form-control" placeholder="Search brands..."
+        @bind="SearchQuery" @oninput="OnInputSearch" />
+    </div>
+    <div class="col-auto">
+        <button class="new-btn btn-primary" @onclick="() => OpenModal(null, ModalType.Edit)">Add new brand</button>
+    </div>
 </div>
+
+<!-- Notification -->
+@if (message != null) {
+    <div class="col-auto">
+        <p class="bg-success text-white msg-notify">@message</p>
+    </div>
+}
+
 
 <!-- Brands Table -->
 <table class="table table-striped">
@@ -39,13 +57,65 @@
                     <td>@brand.Id</td>
                     <td>@brand.Name</td>
                     <td>@brand.Description</td>
-                    <td></td>
+                    <td>
+                        <button class="new-btn btn-warning btn-sm me-2" @onclick="() => OpenModal(brand, ModalType.Edit)">Edit</button>
+                        <button class="new-btn btn-danger btn-sm" @onclick="() => OpenModal(brand,  ModalType.Delete)">Delete</button>
+                    </td>
                 </tr>
             }
         }
     </tbody>
 </table>
 
+<div class="modal @(IsOpenDeleteModal ? "show" : "hide")" tabindex="-1" role="dialog" id="deleteModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the brand "<strong>@BrandToDelete?.Name</strong>"?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="new-btn btn-secondary" data-bs-dismiss="modal" @onclick="() => closeModal(ModalType.Delete)">Cancel</button>
+                <button type="button" class="new-btn btn-danger" @onclick="ConfirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal @(IsOpenEditModal ? "show" : "hide")" tabindex="-1" role="dialog" id="EditModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <EditForm id="editBrandForm" Model="BrandSelected" OnValidSubmit="SaveBrand">
+                <ChildContent Context="formContext">
+                    <div class="modal-header">
+                        <h5 class="modal-title">@(BrandSelected == null ? "Add New Brand" : $"Edit brand {BrandSelected.Name}")</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="name" name="name" @bind="BrandSelected.Name" required />
+                            <ValidationMessage For="@(() => BrandSelected.Name)" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea type="text" class="form-control" id="description" name="description" @bind="BrandSelected.Description" required />
+                            <ValidationMessage For="@(() => BrandSelected.Description)" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="new-btn btn-secondary" data-bs-dismiss="modal" @onclick="() => closeModal(ModalType.Edit)">Cancel</button>
+                        <button type="submit" class="new-btn btn-danger">Save</button>
+                    </div>
+                </ChildContent>
+            </EditForm>
+        </div>
+    </div>
+</div>
 <!-- Pagination -->
 <nav aria-label="Page navigation">
     <ul class="pagination justify-content-center">
@@ -69,7 +139,19 @@
     private int PageSize = 5;
     private int TotalBrands = 0;
     private string SearchQuery = string.Empty;
+    private int TotalPages = 0;
+    private bool IsOpenDeleteModal = false;
+    private BrandVm BrandToDelete { get; set; }
+
+    private bool IsOpenEditModal = false;
+    private BrandVm BrandSelected;
     private PagingData<BrandVm> PagingBrand = new PagingData<BrandVm>([], 0, 1, 5);
+    private string message;
+    private enum ModalType
+    {
+        Delete,
+        Edit
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -78,34 +160,115 @@
 
     private async Task LoadBrands()
     {
-        PagingBrand = await BrandService.getBrands(SearchQuery, CurrentPage, PageSize);
+        PagingBrand = await BrandService.GetBrands(SearchQuery, CurrentPage, PageSize);
         TotalBrands = PagingBrand.TotalCount;
+        TotalPages = PagingBrand.TotalPages;
     }
 
-    private int TotalPages => (int)Math.Ceiling(TotalBrands / (double)PageSize);
-
-    private void PreviousPage()
+    private async void PreviousPage()
     {
         if (CurrentPage > 1)
         {
             CurrentPage--;
-            LoadBrands();
+            await LoadBrands();
         }
     }
 
-    private void NextPage()
+    private async void NextPage()
     {
         if (CurrentPage < PagingBrand.TotalPages)
         {
             CurrentPage++;
-            LoadBrands();
+            await LoadBrands();
         }
     }
 
-    private void GoToPage(int page)
+    private async void GoToPage(int page)
     {
         CurrentPage = page;
-        LoadBrands();
+        await LoadBrands();
     }
-    
+
+    private async Task OnInputSearch(ChangeEventArgs e)
+    {
+        SearchQuery = e.Value?.ToString();
+
+        await LoadBrands();
+    }
+
+    // Open Delete Modal
+    private void OpenModal(BrandVm brand, ModalType modalType)
+    {
+        if (modalType == ModalType.Edit)
+        {
+            IsOpenEditModal = true;
+            BrandSelected = brand ?? new BrandVm();
+        }
+        else
+        {
+            IsOpenDeleteModal = true;
+            BrandToDelete = brand;
+        }
+    }
+
+    // Confirm Delete
+    private async Task ConfirmDelete()
+    {
+        if (BrandToDelete != null)
+        {
+            var result = await BrandService.Delete(BrandToDelete.Id);
+            if (result.Succeeded) {
+                message = "Delete brand successfully !!!";
+                TaskDelayHelper.SetTimeout(
+                    () => {
+                        message = null;
+                        StateHasChanged();
+                    }, 
+                    ConstantValues.NOTIFY_TIME_OUT);
+
+            }
+            await LoadBrands(); // Refresh the list after deletion
+        }
+        closeModal(ModalType.Delete);
+    }
+
+    private void closeModal(ModalType modalType)
+    {
+        if (modalType == ModalType.Edit)
+        {
+            IsOpenEditModal = false;
+            BrandSelected = null;
+        }
+        else if (modalType == ModalType.Delete)
+        {
+            IsOpenDeleteModal = false;
+        }
+    }
+
+    private async Task SaveBrand()
+    {
+        if (BrandSelected.Id == 0)
+        {
+            var result = await BrandService.CreateBrandAsync(BrandSelected);
+            if (result.Succeeded)
+            {
+                message = "Create new brand successfully !!!";
+                TaskDelayHelper.SetTimeout(() => ResetMessage(), ConstantValues.NOTIFY_TIME_OUT);
+            }
+        }
+        else
+        {
+            var result = await BrandService.UpdateBrandAsync(BrandSelected);
+            message = $"Edit brand {BrandSelected.Name} successfully !!!";
+            TaskDelayHelper.SetTimeout(() => ResetMessage(), ConstantValues.NOTIFY_TIME_OUT);
+            BrandSelected = null;
+        }
+        closeModal(ModalType.Edit);
+        await LoadBrands();
+    }
+
+    private void ResetMessage() {
+        message = null;
+        StateHasChanged();
+    }
 }

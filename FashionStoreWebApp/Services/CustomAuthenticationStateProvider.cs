@@ -1,8 +1,10 @@
 ﻿using System.Net.Http.Json;
 using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 using FashionStoreViewModel;
 using FashionStoreWebApp.Constants;
+using FashionStoreWebApp.Helpers;
 using Microsoft.AspNetCore.Components.Authorization;
 
 namespace FashionStoreWebApp.Services
@@ -68,29 +70,12 @@ namespace FashionStoreWebApp.Services
                     return new FormResult { Succeeded = true };
                 }
 
-                var errors = new List<string>();
-                var details = await result.Content.ReadAsStringAsync();
-                var problemDetails = JsonDocument.Parse(details);
-                var errorList = problemDetails.RootElement.GetProperty("errors");
+                var errors = ErrorResponseHelper.GetErrorMsgFromResponse(await result.Content.ReadAsStringAsync());
 
-                foreach (var errorEntry in errorList.EnumerateObject())
-                {
-                    if (errorEntry.Value.ValueKind == JsonValueKind.String)
-                    {
-                        errors.Add(errorEntry.Value.GetString()!);
-                    }
-                    else if (errorEntry.Value.ValueKind == JsonValueKind.Array)
-                    {
-                        errors.AddRange(
-                            errorEntry.Value.EnumerateArray().Select(
-                                e => e.GetString() ?? string.Empty)
-                            .Where(e => !string.IsNullOrEmpty(e)));
-                    }
-                }
                 return new FormResult
                 {
                     Succeeded = false,
-                    ErrorList = problemDetails == null ? defaultDetail : [.. errors]
+                    ErrorList = !errors.Any() ? defaultDetail : [.. errors]
                 };
             }
             catch (Exception ex)
@@ -129,5 +114,14 @@ namespace FashionStoreWebApp.Services
             };
         }
 
+        public async Task LogoutAsync()
+        {
+            const string Empty = "{}";
+            var emptyContent = new StringContent(Empty, Encoding.UTF8, "application/json");
+
+            await _httpClient.PostAsync("api/Users/logout", emptyContent);
+            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+
+        }
     }
 }

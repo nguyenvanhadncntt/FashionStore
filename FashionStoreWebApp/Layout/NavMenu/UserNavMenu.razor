@@ -1,4 +1,9 @@
-﻿<!-- Nav Bar Start -->
+﻿@using FashionStoreWebApp.Services
+
+@inject NavigationManager Navigation
+@inject IAccountManagementService AccountManagementService
+
+<!-- Nav Bar Start -->
 <div class="nav">
     <div class="container-fluid">
         <nav class="navbar navbar-expand-md bg-dark navbar-dark">
@@ -21,7 +26,7 @@
                                 <div class="dropdown-menu">
                                     <a href="/login" class="dropdown-item">My Account</a>
                                     <a href="/register" class="dropdown-item">My Orders</a>
-                                    <a href="/register" class="dropdown-item">Logout</a>
+                                    <a @onclick="logout" class="dropdown-item">Logout</a>
                                 </div>
                             </div>
                         </Authorized>
@@ -76,5 +81,9 @@
 <!-- Bottom Bar End -->
 
 @code {
-
+    private async Task logout()
+    {
+        await AccountManagementService.LogoutAsync();
+        Navigation.NavigateTo("/");
+    }
 }
