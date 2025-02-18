@@ -10,8 +10,9 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddAuthorizationCore();
 builder.Services.AddTransient<CutomHttpHandler>();
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddScoped(sp => (IAccountManagementService)sp.GetRequiredService<AuthenticationStateProvider>());
 
 builder.Services.AddScoped(sp => new HttpClient
