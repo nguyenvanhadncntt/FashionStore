@@ -14,10 +14,13 @@ namespace FashionStoreWebApp.Services
             _httpClient = httpClientFactory.CreateClient("Auth");
         }
 
-        public async Task<PagingData<ProductVm>> SearchProduct(string productName, int pageIndex, int pageSize)
+        public async Task<PagingData<ProductVm>> SearchProduct(ProductSearchRequest productSearch, int pageIndex, 
+            int pageSize, string sortBy = "Id", bool isAscending = false)
         {
             var response = await _httpClient.GetAsync(
-                $"/api/Products?name={productName}&pageNumber={pageIndex}&pageSize={pageSize}"
+                $"/api/Products?name={productSearch.name}&categoryId={productSearch.categoryId}" +
+                $"&brandId={productSearch.brandId}&pageNumber={pageIndex}&pageSize={pageSize}" +
+                $"&sortBy={sortBy}&isAscending={isAscending}"
             );
             var productJson = await response.Content.ReadAsStringAsync();
             var result = JsonSerializer.Deserialize<PagingData<ProductVm>>(productJson, ConstantValues.jsonSerializerOptions);

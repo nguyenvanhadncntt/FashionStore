@@ -15,7 +15,7 @@
 <h3>Product Management</h3>
 
 <!-- Search Box -->
-<div class="mb-3 row">
+<div class="my-4 row">
     <div class="col-4">
         <input type="text" class="form-control" placeholder="Search Name..."
                @bind="NameQuery" @oninput="OnInputNameSearch" />
@@ -73,7 +73,6 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Confirm Deletion</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p>Are you sure you want to delete the product "<strong>@ProductToDelete?.Name</strong>"?</p>
@@ -85,6 +84,24 @@
         </div>
     </div>
 </div>
+
+<!-- Pagination -->
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+            <button class="page-link" @onclick="PreviousPage">Previous</button>
+        </li>
+        @foreach (var number in PagingNumbers)
+        {
+            <li class="page-item @(number == CurrentPage ? "active" : "")">
+                <button class="page-link" @onclick="() => GoToPage(number)">@number</button>
+            </li>
+        }
+        <li class="page-item @(CurrentPage == PagingProduct.TotalPages ? "disabled" : "")">
+            <button class="page-link" @onclick="NextPage">Next</button>
+        </li>
+    </ul>
+</nav>
 
 @code {
     private int CurrentPage = ConstantValues.FIRST_PAGE;
@@ -106,7 +123,11 @@
 
     private async Task LoadProducts()
     {
-        PagingProduct = await ProductService.SearchProduct(NameQuery, CurrentPage, PageSize);
+        PagingProduct = await ProductService.SearchProduct(new ProductSearchRequest() {
+				name = NameQuery,
+				categoryId = ConstantValues.ZERO,
+				brandId = ConstantValues.ZERO
+        }, CurrentPage, PageSize);
         GeneratePageNumberItems();
         StateHasChanged();
     }

@@ -17,44 +17,44 @@
 </div>
 
 <!-- Roles Table -->
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Roles.Count == 0)
-        {
+<div class="mt-4">
+    <table class="table table-striped">
+        <thead>
             <tr>
-                <td colspan="3" class="text-center">No roles found.</td>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Action</th>
             </tr>
-        }
-        else
-        {
-            @foreach (var role in Roles)
+        </thead>
+        <tbody>
+            @if (Roles.Count == 0)
             {
                 <tr>
-                    <td>@role.Id</td>
-                    <td>@role.Name</td>
-                    <td>
-                        <button class="btn btn-warning btn-sm me-2" @onclick="() => OpenModal(role, ModalType.Edit)">Edit</button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => OpenModal(role,  ModalType.Delete)">Delete</button>
-                    </td>
+                    <td colspan="3" class="text-center">No roles found.</td>
                 </tr>
             }
-        }
-    </tbody>
-</table>
-
+            else
+            {
+                @foreach (var role in Roles)
+                {
+                    <tr>
+                        <td>@role.Id</td>
+                        <td>@role.Name</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm me-2" @onclick="() => OpenModal(role, ModalType.Edit)">Edit</button>
+                            <button class="btn btn-danger btn-sm" @onclick="() => OpenModal(role,  ModalType.Delete)">Delete</button>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
 <div class="modal @(IsOpenDeleteModal ? "show" : "hide")" tabindex="-1" role="dialog" id="deleteModal">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Confirm Deletion</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p>Are you sure you want to delete the Role "<strong>@RoleToDelete?.Name</strong>"?</p>
@@ -74,7 +74,6 @@
                 <ChildContent Context="formContext">
                     <div class="modal-header">
                         <h5 class="modal-title">@(RoleSelected.Id.ToString() == null ? "Add New Role" : $"Edit Role {RoleSelected.Name}")</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <DataAnnotationsValidator />
