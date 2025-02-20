@@ -2,6 +2,7 @@
 @using FashionStoreWebApp.Layout.NavMenu;
 @using Blazored.Toast.Configuration;
 @using FashionStoreWebApp.Constants;
+@using FashionStoreWebApp.Layout.Footer;
 
 @inject AuthenticationStateProvider AuthStateProvider
 
@@ -14,15 +15,11 @@
                 ShowProgressBar="true" />
 
 @if (isAdmin) {
-    <div class="page">
-        <div class="sidebar">
+    <div class="page d-flex">
+        <div class="sidebar" style="width: 15%">
             <AdminNavMenu />
         </div>
-        <main>
-            <div class="top-row px-4">
-                <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-            </div>
-
+        <main style="width: 85%">
             <article class="content px-4">
                 @Body
             </article>
@@ -36,6 +33,7 @@ else {
             @Body
         </article>
     </main>
+    @* <UserFooter /> *@
 }
 
 

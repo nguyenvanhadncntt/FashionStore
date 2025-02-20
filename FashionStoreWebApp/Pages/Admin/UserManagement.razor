@@ -26,11 +26,11 @@
                @bind="EmailQuery" @oninput="OnInputEmailSearch" />
     </div>
     <div class="col-auto ml-auto">
-        <button class="new-btn btn-primary" @onclick="() => OpenModal(null, ModalType.Edit)">Add new user</button>
+        <button class="btn btn-primary" @onclick="() => OpenModal(null, ModalType.Edit)">Add new user</button>
     </div>
 </div>
 
-<!-- Brands Table -->
+<!-- Users Table -->
 <table class="table table-striped">
     <thead>
         <tr>
@@ -60,8 +60,8 @@
                     <td>@user.PhoneNumber</td>
                     <td>@user.Role</td>
                     <td>
-                        <button class="new-btn btn-warning btn-sm me-2" @onclick="() => OpenModal(user, ModalType.Edit)">Edit</button>
-                        <button class="new-btn btn-danger btn-sm" @onclick="() => OpenModal(user, ModalType.Delete)">Delete</button>
+                        <button class="btn btn-warning btn-sm me-2" @onclick="() => OpenModal(user, ModalType.Edit)">Edit</button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => OpenModal(user, ModalType.Delete)">Delete</button>
                     </td>
                 </tr>
             }
@@ -80,8 +80,8 @@
                 <p>Are you sure you want to delete the User "<strong>@(UserToDelete?.FirstName + " " + UserToDelete?.LastName)</strong>"?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="new-btn btn-secondary" data-bs-dismiss="modal" @onclick="() => closeModal(ModalType.Delete)">Cancel</button>
-                <button type="button" class="new-btn btn-danger" @onclick="ConfirmDelete">Delete</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => closeModal(ModalType.Delete)">Cancel</button>
+                <button type="button" class="btn btn-danger" @onclick="ConfirmDelete">Delete</button>
             </div>
         </div>
     </div>
@@ -90,7 +90,7 @@
 <div class="modal @(IsOpenEditModal ? "show" : "hide")" tabindex="-1" role="dialog" id="EditModal">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <EditForm id="editBrandForm" Model="UserCreation" OnValidSubmit="SaveUser">
+            <EditForm id="editUserForm" Model="UserCreation" OnValidSubmit="SaveUser">
                 <ChildContent Context="formContext">
                     <div class="modal-header">
                         <h5 class="modal-title">@(string.IsNullOrEmpty(UserCreation.Id) ? "Add New User" : $"Edit User {UserCreation.FirstName + " " + UserCreation.LastName}")</h5>
@@ -145,8 +145,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="new-btn btn-secondary" data-bs-dismiss="modal" @onclick="() => closeModal(ModalType.Edit)">Cancel</button>
-                        <button type="submit" class="new-btn btn-danger">Save</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => closeModal(ModalType.Edit)">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Save</button>
                     </div>
                 </ChildContent>
             </EditForm>
@@ -192,6 +192,7 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadUsers();
+        StateHasChanged();
     }
 
     private async Task LoadUsers()
@@ -304,7 +305,7 @@
             var result = await UserService.CreateUserAsync(UserCreation);
             if (result.Succeeded)
             {
-                ToastService.ShowSuccess("Create new brand successfully !!!");
+                ToastService.ShowSuccess("Create new user successfully !!!");
             }
         }
         else

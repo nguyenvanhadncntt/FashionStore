@@ -24,25 +24,32 @@ namespace FashionStoreWebApp.Services
             return result ?? new PagingData<ProductVm>(new List<ProductVm>(), 0, pageIndex, pageSize);
         }
 
-        //public async Task<FormResult> CreateProductAsync(ProductCreationDTO productCreation)
-        //{
-        //    var result = await _httpClient.PostAsJsonAsync("/api/Products", productCreation);
-        //    if (result.IsSuccessStatusCode)
-        //    {
-        //        return new FormResult { Succeeded = true };
-        //    }
-        //    return await ErrorResponseHelper.ConvertToFormResultError(result);
-        //}
+        public async Task<ProductVm> GetByIdAsync(long productId)
+        {
+            var response = await _httpClient.GetAsync($"/api/Products/{productId}");
+            var productJson = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<ProductVm>(productJson, ConstantValues.jsonSerializerOptions);
+        }
 
-        //public async Task<FormResult> UpdateProductAsync(ProductCreationDTO productDto)
-        //{
-        //    var result = await _httpClient.PutAsJsonAsync("/api/Products", productDto);
-        //    if (result.IsSuccessStatusCode)
-        //    {
-        //        return new FormResult { Succeeded = true };
-        //    }
-        //    return await ErrorResponseHelper.ConvertToFormResultError(result);
-        //}
+        public async Task<FormResult> CreateProductAsync(MultipartFormDataContent productCreation)
+        {
+            var result = await _httpClient.PostAsync("/api/Products", productCreation);
+            if (result.IsSuccessStatusCode)
+            {
+                return new FormResult { Succeeded = true };
+            }
+            return await ErrorResponseHelper.ConvertToFormResultError(result);
+        }
+
+        public async Task<FormResult> UpdateProductAsync(MultipartFormDataContent productDto)
+        {
+            var result = await _httpClient.PutAsync("/api/Products", productDto);
+            if (result.IsSuccessStatusCode)
+            {
+                return new FormResult { Succeeded = true };
+            }
+            return await ErrorResponseHelper.ConvertToFormResultError(result);
+        }
 
         public async Task<FormResult> DeleteProductAsync(long productId)
         {

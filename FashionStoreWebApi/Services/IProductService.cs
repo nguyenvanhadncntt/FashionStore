@@ -5,7 +5,7 @@ namespace FashionStoreWebApi.Services
 {
     public interface IProductService
     {
-        Task<ProductCreationDTO> GetProductByIdAsync(long productId);
+        Task<ProductVm> GetProductByIdAsync(long productId);
         Task<ProductVm> UpdateProduct(ProductCreationDTO productVm);
         Task<ProductVm> createProductAsync(ProductCreationDTO productVm);
         Task<bool> DeleteProductAsync(long productId);

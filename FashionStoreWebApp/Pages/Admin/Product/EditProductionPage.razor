@@ -1,0 +1,188 @@
+﻿@page "/products/edit/{productId:long}"
+@using FashionStoreViewModel;
+@using FashionStoreWebApp.Services;
+@using FashionStoreWebApp.Helpers;
+@using FashionStoreWebApp.Constants;
+@using FashionStoreViewModel.Enumerations;
+@inject IJSRuntime JS;
+@using ChangeEventArgs = Microsoft.AspNetCore.Components.ChangeEventArgs;
+
+@attribute [Authorize(Roles = "Admin")]
+
+@inject NavigationManager Navigation;
+@inject IToastService ToastService;
+@inject IProductService ProductService;
+@inject ICategoryService CategoryService;
+@inject IBrandService BrandService;
+
+<h3>@(Product.Id == 0 ? "Add New Product" : $"Edit Product {Product.Name}")</h3>
+
+<EditForm Model="Product" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <!-- Product Name -->
+    <div class="form-group">
+        <label for="productName">Product Name</label>
+        <InputText id="productName" @bind-Value="Product.Name" class="form-control" placeholder="Enter product name" />
+        <ValidationMessage For="() => Product.Name" />
+    </div>
+
+    <!-- Product Description -->
+    <div class="form-group">
+        <label for="productDescription">Description</label>
+        <InputTextArea id="productDescription" @bind-Value="Product.Description" class="form-control" placeholder="Enter product description" />
+        <ValidationMessage For="() => Product.Description" />
+    </div>
+
+    <!-- Product Price -->
+    <div class="form-group">
+        <label for="productPrice">Price ($)</label>
+        <InputNumber id="productPrice" @bind-Value="Product.Price" class="form-control" placeholder="Enter product price" />
+        <ValidationMessage For="() => Product.Price" />
+    </div>
+
+    <!-- Product Category -->
+    <div class="form-group">
+        <label for="productCategory">Category</label>
+        <InputSelect id="productCategory" @bind-Value="Product.CategoryId" class="form-control">
+            <option value="">-- Select Category --</option>
+			@foreach (var category in Categories)
+            {
+                <option value="@category.Id">@category.Name</option>
+            })
+        </InputSelect>
+        <ValidationMessage For="() => Product.CategoryId" />
+    </div>
+
+    <!-- Product Brand -->
+    <div class="form-group">
+        <label for="productBrand">Brand</label>
+        <InputSelect id="productBrand" @bind-Value="Product.BrandId" class="form-control">
+            <option value="">-- Select Brand --</option>
+            @foreach (var brand in Brands)
+            {
+                <option value="@brand.Id">@brand.Name</option>
+            })
+        </InputSelect>
+        <ValidationMessage For="() => Product.BrandId" />
+    </div>
+
+    <!-- Product Image Upload -->
+    <div class="form-group">
+        <label for="productImage">Upload Image</label>
+        <InputFile id="productImage" OnChange="HandleFileSelected" />
+        @if (!string.IsNullOrEmpty(imagePreviewUrl))
+        {
+        }
+        <img src="https://localhost:7012/@Product.ImageUrl" alt="Image Preview" class="image-preview" style="max-width: 200px; max-height: 200px; margin-top: 10px;" />
+    </div>
+
+    <!-- Stock Quantity -->
+    <div class="form-group">
+        <label for="productStock">Stock Quantity</label>
+        <InputNumber id="productStock" @bind-Value="Product.StockQuantity" class="form-control" placeholder="Enter stock quantity" />
+        <ValidationMessage For="() => Product.StockQuantity" />
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+    </div>
+</EditForm>
+
+@code {
+    private ProductVm Product = new ProductVm();
+    private IList<CategoryVm> Categories = new List<CategoryVm>();
+    private IList<BrandVm> Brands = new List<BrandVm>();
+
+    [Parameter]
+    public long productId { get; set; }
+
+    private IBrowserFile selectedFile;
+    private string imagePreviewUrl;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FetchBrands();
+        await FetchCategories();
+    }
+
+    protected override void OnParametersSet()
+    {
+        FetchProduct();
+        base.OnParametersSet();
+    }
+
+    private async void FetchProduct()
+    {
+        if (productId > 0) {
+            Product = await ProductService.GetByIdAsync(productId);
+        } else {
+            Product = new ProductVm();
+        }
+        StateHasChanged();
+    }
+
+    private async Task FetchCategories()
+    {
+        var PagingCategories = await CategoryService.GetCategoriesAsync(string.Empty, ConstantValues.FIRST_PAGE, ConstantValues.MAX_PAGE_SIZE);
+        Categories = PagingCategories.Items;
+    }
+
+    private async Task FetchBrands()
+    {
+        var PagingBrands = await BrandService.GetBrands(string.Empty, ConstantValues.FIRST_PAGE, ConstantValues.MAX_PAGE_SIZE);
+        Brands = PagingBrands.Items;
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+    }
+
+    private async Task HandleSubmit()
+    {
+        using var content = new MultipartFormDataContent();
+
+        if (Product.Id != 0) {
+            content.Add(new StringContent(Product.Id.ToString()), "Id");
+        }
+
+        // Add product data
+        content.Add(new StringContent(Product.Name), "Name");
+        content.Add(new StringContent(Product.Description), "Description");
+        content.Add(new StringContent(Product.Price.ToString()), "Price");
+        content.Add(new StringContent(Product.CategoryId.ToString()), "CategoryId");
+        content.Add(new StringContent(Product.BrandId.ToString()), "BrandId");
+        content.Add(new StringContent(Product.StockQuantity.ToString()), "StockQuantity");
+
+        // Add image file if selected
+        if (selectedFile != null)
+        {
+            var fileContent = new StreamContent(selectedFile.OpenReadStream());
+            fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(selectedFile.ContentType);
+            content.Add(fileContent, "Image", selectedFile.Name);
+        }
+
+        if (Product.Id != 0)
+        {
+            content.Add(new StringContent(Product.Id.ToString()), "Id");
+            await ProductService.UpdateProductAsync(content);
+			ToastService.ShowSuccess("Product updated successfully.");
+            Navigation.NavigateTo("/products");
+		}
+		else
+		{
+            await ProductService.CreateProductAsync(content);
+            ToastService.ShowSuccess("Product created successfully.");
+            Navigation.NavigateTo("/products");
+        }
+
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/products"); // Redirect to product list
+    }
+}

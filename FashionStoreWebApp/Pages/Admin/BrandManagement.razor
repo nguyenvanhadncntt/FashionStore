@@ -21,7 +21,7 @@
         @bind="SearchQuery" @oninput="OnInputSearch" />
     </div>
     <div class="col-auto">
-        <button class="new-btn btn-primary" @onclick="() => OpenModal(null, ModalType.Edit)">Add new brand</button>
+        <button class="btn btn-primary" @onclick="() => OpenModal(null, ModalType.Edit)">Add new brand</button>
     </div>
 </div>
 
@@ -51,8 +51,8 @@
                     <td>@brand.Name</td>
                     <td>@brand.Description</td>
                     <td>
-                        <button class="new-btn btn-warning btn-sm me-2" @onclick="() => OpenModal(brand, ModalType.Edit)">Edit</button>
-                        <button class="new-btn btn-danger btn-sm" @onclick="() => OpenModal(brand,  ModalType.Delete)">Delete</button>
+                        <button class="btn btn-warning btn-sm me-2" @onclick="() => OpenModal(brand, ModalType.Edit)">Edit</button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => OpenModal(brand,  ModalType.Delete)">Delete</button>
                     </td>
                 </tr>
             }
@@ -71,8 +71,8 @@
                 <p>Are you sure you want to delete the brand "<strong>@BrandToDelete?.Name</strong>"?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="new-btn btn-secondary" data-bs-dismiss="modal" @onclick="() => closeModal(ModalType.Delete)">Cancel</button>
-                <button type="button" class="new-btn btn-danger" @onclick="ConfirmDelete">Delete</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => closeModal(ModalType.Delete)">Cancel</button>
+                <button type="button" class="btn btn-danger" @onclick="ConfirmDelete">Delete</button>
             </div>
         </div>
     </div>
@@ -101,8 +101,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="new-btn btn-secondary" data-bs-dismiss="modal" @onclick="() => closeModal(ModalType.Edit)">Cancel</button>
-                        <button type="submit" class="new-btn btn-danger">Save</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => closeModal(ModalType.Edit)">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Save</button>
                     </div>
                 </ChildContent>
             </EditForm>
@@ -149,6 +149,7 @@
     {
         PagingBrand = await BrandService.GetBrands(SearchQuery, CurrentPage, PageSize);
         GeneratePageNumberItems();
+		StateHasChanged();
     }
 
     private async void PreviousPage()

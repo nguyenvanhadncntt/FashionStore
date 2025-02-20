@@ -55,10 +55,10 @@ namespace FashionStoreWebApi.Services
             return await _dbContext.SaveChangesAsync() > 0;
         }
 
-        public async Task<ProductCreationDTO> GetProductByIdAsync(long productId)
+        public async Task<ProductVm> GetProductByIdAsync(long productId)
         {
             var product = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == productId);
-            return new ProductCreationDTO
+            return new ProductVm
             {
                 Id = product.Id,
                 Name = product.Name,
@@ -130,7 +130,7 @@ namespace FashionStoreWebApi.Services
             product.CategoryId = productDto.CategoryId;
             product.BrandId = productDto.BrandId;
             product.StockQuantity = productDto.StockQuantity;
-            product.ImageUrl = productDto.ImageUrl;
+            product.ImageUrl = productDto.ImageUrl ?? product.ImageUrl;
             product.UpdatedAt = DateTime.Now;
             product.Brand = brand;
             product.Category = category;

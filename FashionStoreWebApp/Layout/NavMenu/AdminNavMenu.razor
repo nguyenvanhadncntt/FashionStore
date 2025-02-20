@@ -3,54 +3,76 @@
 @inject NavigationManager Navigation
 @inject IAccountManagementService AccountManagementService
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">FashionStoreWebApp</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+
+<div class="d-flex" id="wrapper">
+    <!-- Sidebar -->
+    <div class="bg-dark border-end" id="sidebar-wrapper">
+        <div class="sidebar-heading text-white bg-primary py-3">
+            <i class="bi bi-speedometer2 me-2"></i> Admin Panel
+        </div>
+        <div class="list-group list-group-flush">
+            <a href="/brands" class="list-group-item list-group-item-action bg-dark text-white">
+                <i class="bi bi-grid me-2"></i> Brands
+            </a>
+            <a href="/products" class="list-group-item list-group-item-action bg-dark text-white">
+                <i class="bi bi-box-seam me-2"></i> Products
+            </a>
+            <a href="/categories" class="list-group-item list-group-item-action bg-dark text-white">
+                <i class="bi bi-tags me-2"></i> Categories
+            </a>
+            <a href="/roles" class="list-group-item list-group-item-action bg-dark text-white">
+                <i class="bi bi-cart-check me-2"></i> Roles
+            </a>
+            <a href="/users" class="list-group-item list-group-item-action bg-dark text-white">
+                <i class="bi bi-people me-2"></i> Users
+            </a>
+            <a href="/orders" class="list-group-item list-group-item-action bg-dark text-white">
+                <i class="bi bi-gear me-2"></i> Orders
+            </a>
+            <a class="list-group-item list-group-item-action bg-dark text-white" @onclick="logout">
+                <i class="bi bi-box-arrow-left me-2"></i> Logout
+            </a>
+        </div>
     </div>
 </div>
+<style>
+    #sidebar-wrapper {
+        min-height: 100vh;
+        width: 250px;
+        transition: margin-left 0.3s;
+    }
 
-<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/brands" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Brands
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="categories">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Categories
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="roles">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Roles
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="users">
-                <span class="bi bi-people-fill-nav-menu" aria-hidden="true"></span> User Management
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="products">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Products
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="orders">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Orders
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" @onclick="logout">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Logout
-            </NavLink>
-        </div>
-    </nav>
-</div>
+    #page-content-wrapper {
+        width: 100%;
+        transition: margin-left 0.3s;
+    }
+
+    .list-group-item {
+        border: none;
+        padding: 1rem;
+    }
+
+    .list-group-item:hover {
+        background-color: #333 !important;
+    }
+
+    .sidebar-heading {
+        font-size: 1.25rem;
+        font-weight: bold;
+    }
+
+    /* Collapsed Sidebar */
+    #wrapper.toggled #sidebar-wrapper {
+        margin-left: -250px;
+    }
+
+    /* Toggle Button */
+    #menu-toggle {
+        display: none;
+    }
+
+
+</style>
 
 @code {
     private bool collapseNavMenu = true;

@@ -18,15 +18,15 @@
 <!-- Search Box -->
 <div class="mb-3 row">
     <div class="col-5">
-        <input type="text" class="form-control" placeholder="Search brands..."
+        <input type="text" class="form-control" placeholder="Search Categories..."
                @bind="SearchQuery" @oninput="OnInputSearch" />
     </div>
     <div class="col-auto">
-        <button class="new-btn btn-primary" @onclick="() => OpenModal(null, ModalType.Edit)">Add new category</button>
+        <button class="btn btn-primary" @onclick="() => OpenModal(null, ModalType.Edit)">Add new category</button>
     </div>
 </div>
 
-<!-- Brands Table -->
+<!-- Categoriess Table -->
 <table class="table table-striped">
     <thead>
         <tr>
@@ -52,8 +52,8 @@
                     <td>@category.Name</td>
                     <td>@category.Description</td>
                     <td>
-                        <button class="new-btn btn-warning btn-sm me-2" @onclick="() => OpenModal(category, ModalType.Edit)">Edit</button>
-                        <button class="new-btn btn-danger btn-sm" @onclick="() => OpenModal(category,  ModalType.Delete)">Delete</button>
+                        <button class="btn btn-warning btn-sm me-2" @onclick="() => OpenModal(category, ModalType.Edit)">Edit</button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => OpenModal(category,  ModalType.Delete)">Delete</button>
                     </td>
                 </tr>
             }
@@ -72,8 +72,8 @@
                 <p>Are you sure you want to delete the Category "<strong>@CategoryToDelete?.Name</strong>"?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="new-btn btn-secondary" data-bs-dismiss="modal" @onclick="() => closeModal(ModalType.Delete)">Cancel</button>
-                <button type="button" class="new-btn btn-danger" @onclick="ConfirmDelete">Delete</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => closeModal(ModalType.Delete)">Cancel</button>
+                <button type="button" class="btn btn-danger" @onclick="ConfirmDelete">Delete</button>
             </div>
         </div>
     </div>
@@ -82,10 +82,10 @@
 <div class="modal @(IsOpenEditModal ? "show" : "hide")" tabindex="-1" role="dialog" id="EditModal">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <EditForm id="editBrandForm" Model="@CategorySelected" OnValidSubmit="SaveBrand">
+            <EditForm id="editCategoryForm" Model="@CategorySelected" OnValidSubmit="SaveCategory">
                 <ChildContent Context="formContext">
                     <div class="modal-header">
-                        <h5 class="modal-title">@(CategorySelected.Id == 0 ? "Add New Brand" : $"Edit brand {CategorySelected.Name}")</h5>
+                        <h5 class="modal-title">@(CategorySelected.Id == 0 ? "Add New Category" : $"Edit Category {CategorySelected.Name}")</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -102,8 +102,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="new-btn btn-secondary" data-bs-dismiss="modal" @onclick="() => closeModal(ModalType.Edit)">Cancel</button>
-                        <button type="submit" class="new-btn btn-danger">Save</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => closeModal(ModalType.Edit)">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Save</button>
                     </div>
                 </ChildContent>
             </EditForm>
@@ -209,7 +209,7 @@
             var result = await CategoryService.DeleteCategoryAsync(CategoryToDelete.Id);
             if (result.Succeeded)
             {
-                ToastService.ShowSuccess($"Delete brand {CategoryToDelete.Name} successfully !!!");
+                ToastService.ShowSuccess($"Delete Category {CategoryToDelete.Name} successfully !!!");
             }
             CategoryToDelete = null;
             await LoadCategories(); // Refresh the list after deletion
@@ -231,14 +231,14 @@
         }
     }
 
-    private async Task SaveBrand()
+    private async Task SaveCategory()
     {
         if (CategorySelected.Id == 0)
         {
             var result = await CategoryService.CreateCategoryAsync(CategorySelected);
             if (result.Succeeded)
             {
-                ToastService.ShowSuccess("Create new brand successfully !!!");
+                ToastService.ShowSuccess("Create new category successfully !!!");
             }
         }
         else
@@ -246,7 +246,7 @@
             var result = await CategoryService.UpdateCategoryAsync(CategorySelected);
             if (result.Succeeded)
             {
-                ToastService.ShowSuccess($"Edit brand {CategorySelected.Name} successfully !!!");
+                ToastService.ShowSuccess($"Edit category {CategorySelected.Name} successfully !!!");
             }
             CategorySelected = null;
         }

@@ -21,11 +21,11 @@
                @bind="NameQuery" @oninput="OnInputNameSearch" />
     </div>
     <div class="col-auto ml-auto">
-        <button class="new-btn btn-primary" @onclick="() => GoToCreateProductPage()">Add new product</button>
+        <button class="btn btn-primary" @onclick="() => GoToCreateProductPage()">Add new product</button>
     </div>
 </div>
 
-<!-- Brands Table -->
+<!-- Products Table -->
 <table class="table table-striped">
     <thead>
         <tr>
@@ -59,8 +59,8 @@
                     <td>@product.BrandName</td>
                     <td>@product.CategoryName</td>
                     <td>
-                        <button class="new-btn btn-warning btn-sm me-2" @onclick="() => GotoEditPage(product)">Edit</button>
-                        <button class="new-btn btn-danger btn-sm" @onclick="() => OpenDeleteModal(product)">Delete</button>
+                        <button class="btn btn-warning btn-sm me-2" @onclick="() => GotoEditPage(product)">Edit</button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => OpenDeleteModal(product)">Delete</button>
                     </td>
                 </tr>
             }
@@ -79,8 +79,8 @@
                 <p>Are you sure you want to delete the product "<strong>@ProductToDelete?.Name</strong>"?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="new-btn btn-secondary" data-bs-dismiss="modal" @onclick="() => CloseDeleteModal()">Cancel</button>
-                <button type="button" class="new-btn btn-danger" @onclick="ConfirmDelete">Delete</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="() => CloseDeleteModal()">Cancel</button>
+                <button type="button" class="btn btn-danger" @onclick="ConfirmDelete">Delete</button>
             </div>
         </div>
     </div>
@@ -165,12 +165,12 @@
 
     private void GotoEditPage(ProductVm product)
 	{
-		Navigation.NavigateTo($"/products/{product.Id}");
+		Navigation.NavigateTo($"/products/edit/{product.Id}");
 	}
 
 	private void GoToCreateProductPage()
 	{
-		Navigation.NavigateTo("/products/new");
+		Navigation.NavigateTo("/products/edit/0");
 	}
 
     private void CloseDeleteModal()
