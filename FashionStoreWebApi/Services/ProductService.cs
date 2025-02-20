@@ -81,11 +81,11 @@ namespace FashionStoreWebApi.Services
                 var productNameLower = searchRequest.name.ToLower();
                 query = query.Where(p => p.Name.ToLower().Contains(searchRequest.name));
             }
-            if (searchRequest.categoryId != null && searchRequest.categoryId > 0)
+            if (searchRequest.categoryId > 0)
             {
                 query = query.Where(p => p.CategoryId == searchRequest.categoryId);
             }
-            if (searchRequest.brandId != null && searchRequest.brandId > 0)
+            if (searchRequest.brandId > 0)
             {
                 query = query.Where(p => p.BrandId == searchRequest.brandId);
             }
@@ -103,7 +103,8 @@ namespace FashionStoreWebApi.Services
                 .Include(c => c.Category)
                 .Select(p => ConvertVmHelper.ConvertToProductVm(p)).ToListAsync();
 
-            return new PagingData<ProductVm>(products, products.Count, pagingRequest.PageNumber, pagingRequest.PageSize);
+            return new PagingData<ProductVm>(ConvertVmHelper.ExtractItemsPaging(products, pagingRequest.PageNumber, pagingRequest.PageSize),
+                products.Count, pagingRequest.PageNumber, pagingRequest.PageSize);
         }
 
         public async Task<ProductVm> UpdateProduct(ProductCreationDTO productDto)

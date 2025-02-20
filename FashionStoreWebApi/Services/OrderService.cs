@@ -148,7 +148,8 @@ namespace FashionStoreWebApi.Services
                 .ThenInclude(oi => oi.Product)
                 .Select(o => ConvertVmHelper.convertToOrderVm(o))
                 .ToListAsync();
-            return new PagingData<OrderVm>(orderVms, orderVms.Count, pagingRequest.PageNumber, pagingRequest.PageSize);
+            return new PagingData<OrderVm>(ConvertVmHelper.ExtractItemsPaging(orderVms, pagingRequest.PageNumber, pagingRequest.PageSize), 
+                orderVms.Count, pagingRequest.PageNumber, pagingRequest.PageSize);
         }
 
         

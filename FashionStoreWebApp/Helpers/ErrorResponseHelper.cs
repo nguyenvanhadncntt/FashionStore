@@ -1,5 +1,6 @@
 ﻿using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Text.Json;
+using FashionStoreViewModel;
 
 namespace FashionStoreWebApp.Helpers
 {
@@ -28,6 +29,17 @@ namespace FashionStoreWebApp.Helpers
             }
 
             return errors;
+        }
+
+        public static async Task<FormResult> ConvertToFormResultError(HttpResponseMessage response)
+        {
+            var errors = GetErrorMsgFromResponse(await response.Content.ReadAsStringAsync());
+
+            return new FormResult
+            {
+                Succeeded = false,
+                ErrorList = !errors.Any() ? ["Has some error happen, please contract admin"] : [.. errors]
+            };
         }
     }
 }

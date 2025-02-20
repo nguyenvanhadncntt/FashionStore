@@ -45,7 +45,7 @@ namespace FashionStoreWebApi.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpDelete]
+        [HttpDelete("{brandId}")]
         public async Task<IActionResult> DeleteBrand(long brandId)
         {
             return Ok(await _brandService.DeleteBrandAsync(brandId));

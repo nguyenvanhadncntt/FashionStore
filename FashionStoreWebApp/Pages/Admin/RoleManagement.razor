@@ -1,0 +1,183 @@
+﻿@page "/roles";
+@using FashionStoreViewModel;
+@using FashionStoreWebApp.Services;
+@using FashionStoreViewModel.Enumerations;
+
+@attribute [Authorize(Roles = "Admin")]
+
+@inject NavigationManager Navigation;
+@inject IToastService ToastService;
+@inject IRoleService RoleService;
+
+<div class="row">
+    <h3>Roles Management</h3>
+    <div class="col-auto ml-auto">
+        <button class="new-btn btn-primary" @onclick="() => OpenModal(null, ModalType.Edit)">Add new role</button>
+    </div>
+</div>
+
+<!-- Brands Table -->
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Roles.Count == 0)
+        {
+            <tr>
+                <td colspan="3" class="text-center">No roles found.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var role in Roles)
+            {
+                <tr>
+                    <td>@role.Id</td>
+                    <td>@role.Name</td>
+                    <td>
+                        <button class="new-btn btn-warning btn-sm me-2" @onclick="() => OpenModal(role, ModalType.Edit)">Edit</button>
+                        <button class="new-btn btn-danger btn-sm" @onclick="() => OpenModal(role,  ModalType.Delete)">Delete</button>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<div class="modal @(IsOpenDeleteModal ? "show" : "hide")" tabindex="-1" role="dialog" id="deleteModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the Role "<strong>@RoleToDelete?.Name</strong>"?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="new-btn btn-secondary" data-bs-dismiss="modal" @onclick="() => closeModal(ModalType.Delete)">Cancel</button>
+                <button type="button" class="new-btn btn-danger" @onclick="ConfirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal @(IsOpenEditModal ? "show" : "hide")" tabindex="-1" role="dialog" id="EditModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <EditForm id="editBrandForm" Model="RoleSelected" OnValidSubmit="SaveRole">
+                <ChildContent Context="formContext">
+                    <div class="modal-header">
+                        <h5 class="modal-title">@(RoleSelected.Id.ToString() == null ? "Add New Brand" : $"Edit brand {RoleSelected.Name}")</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="name" name="name" @bind="RoleSelected.Name" required />
+                            <ValidationMessage For="@(() => RoleSelected.Name)" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="new-btn btn-secondary" data-bs-dismiss="modal" @onclick="() => closeModal(ModalType.Edit)">Cancel</button>
+                        <button type="submit" class="new-btn btn-danger">Save</button>
+                    </div>
+                </ChildContent>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    private IList<RoleVm> Roles = [];
+
+    private bool IsOpenDeleteModal = false;
+    private RoleVm RoleToDelete { get; set; }
+
+    private bool IsOpenEditModal = false;
+    private RoleVm RoleSelected;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRoles();
+    }
+
+    private async Task LoadRoles()
+    {
+        Roles = await RoleService.GetRolesAsync();
+    }
+
+    // Open Delete Modal
+    private void OpenModal(RoleVm role, ModalType modalType)
+    {
+        if (modalType == ModalType.Edit)
+        {
+            IsOpenEditModal = true;
+            RoleSelected = role ?? new RoleVm();
+        }
+        else
+        {
+            IsOpenDeleteModal = true;
+            RoleToDelete = role;
+        }
+    }
+
+    // Confirm Delete
+    private async Task ConfirmDelete()
+    {
+        if (RoleToDelete != null)
+        {
+            var result = await RoleService.DeleteRole(RoleToDelete.Id.ToString());
+            if (result.Succeeded)
+            {
+                ToastService.ShowSuccess($"Delete Role {RoleToDelete.Name} successfully !!!");
+            }
+            RoleToDelete = null;
+            await LoadRoles(); // Refresh the list after deletion
+        }
+        closeModal(ModalType.Delete);
+    }
+
+    private void closeModal(ModalType modalType)
+    {
+        if (modalType == ModalType.Edit)
+        {
+            IsOpenEditModal = false;
+            RoleSelected = null;
+        }
+        else if (modalType == ModalType.Delete)
+        {
+            IsOpenDeleteModal = false;
+            RoleToDelete = null;
+        }
+    }
+
+    private async Task SaveRole()
+    {
+        if (RoleSelected.Id.ToString() != null)
+        {
+            var result = await RoleService.AddRoleAsync(RoleSelected.Name);
+            if (result.Succeeded)
+            {
+                ToastService.ShowSuccess("Create new Role successfully !!!");
+            }
+        }
+        else
+        {
+            var result = await RoleService.UpdateRole(RoleSelected);
+            if (result.Succeeded)
+            {
+                ToastService.ShowSuccess($"Edit Role {RoleSelected.Name} successfully !!!");
+            }
+            RoleSelected = null;
+        }
+        closeModal(ModalType.Edit);
+        await LoadRoles();
+    }
+}

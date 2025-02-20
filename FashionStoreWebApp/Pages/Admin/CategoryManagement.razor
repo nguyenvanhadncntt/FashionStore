@@ -1,0 +1,269 @@
+﻿@page "/categories";
+@using FashionStoreViewModel;
+@using FashionStoreWebApp.Services;
+@using FashionStoreWebApp.Helpers;
+@using FashionStoreWebApp.Constants;
+@using FashionStoreViewModel.Enumerations;
+@using ChangeEventArgs = Microsoft.AspNetCore.Components.ChangeEventArgs;
+
+
+@attribute [Authorize(Roles = "Admin")]
+@inject NavigationManager Navigation
+@inject IToastService ToastService
+@inject ICategoryService CategoryService
+
+
+<h3>Category Management</h3>
+
+<!-- Search Box -->
+<div class="mb-3 row">
+    <div class="col-5">
+        <input type="text" class="form-control" placeholder="Search brands..."
+               @bind="SearchQuery" @oninput="OnInputSearch" />
+    </div>
+    <div class="col-auto">
+        <button class="new-btn btn-primary" @onclick="() => OpenModal(null, ModalType.Edit)">Add new category</button>
+    </div>
+</div>
+
+<!-- Brands Table -->
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (PagingCategory.TotalCount == 0)
+        {
+            <tr>
+                <td colspan="4" class="text-center">No categories found.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var category in PagingCategory.Items)
+            {
+                <tr>
+                    <td>@category.Id</td>
+                    <td>@category.Name</td>
+                    <td>@category.Description</td>
+                    <td>
+                        <button class="new-btn btn-warning btn-sm me-2" @onclick="() => OpenModal(category, ModalType.Edit)">Edit</button>
+                        <button class="new-btn btn-danger btn-sm" @onclick="() => OpenModal(category,  ModalType.Delete)">Delete</button>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<div class="modal @(IsOpenDeleteModal ? "show" : "hide")" tabindex="-1" role="dialog" id="deleteModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the Category "<strong>@CategoryToDelete?.Name</strong>"?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="new-btn btn-secondary" data-bs-dismiss="modal" @onclick="() => closeModal(ModalType.Delete)">Cancel</button>
+                <button type="button" class="new-btn btn-danger" @onclick="ConfirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal @(IsOpenEditModal ? "show" : "hide")" tabindex="-1" role="dialog" id="EditModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <EditForm id="editBrandForm" Model="@CategorySelected" OnValidSubmit="SaveBrand">
+                <ChildContent Context="formContext">
+                    <div class="modal-header">
+                        <h5 class="modal-title">@(CategorySelected.Id == 0 ? "Add New Brand" : $"Edit brand {CategorySelected.Name}")</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="name" name="name" @bind="CategorySelected.Name" required />
+                            <ValidationMessage For="@(() => CategorySelected.Name)" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea type="text" class="form-control" id="description" name="description" @bind="CategorySelected.Description" required />
+                            <ValidationMessage For="@(() => CategorySelected.Description)" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="new-btn btn-secondary" data-bs-dismiss="modal" @onclick="() => closeModal(ModalType.Edit)">Cancel</button>
+                        <button type="submit" class="new-btn btn-danger">Save</button>
+                    </div>
+                </ChildContent>
+            </EditForm>
+        </div>
+    </div>
+</div>
+<!-- Pagination -->
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+            <button class="page-link" @onclick="PreviousPage">Previous</button>
+        </li>
+        @foreach (var number in PagingNumbers)
+        {
+            <li class="page-item @(number == CurrentPage ? "active" : "")">
+                <button class="page-link" @onclick="() => GoToPage(number)">@number</button>
+            </li>
+        }
+        <li class="page-item @(CurrentPage == PagingCategory.TotalPages ? "disabled" : "")">
+            <button class="page-link" @onclick="NextPage">Next</button>
+        </li>
+    </ul>
+</nav>
+
+@code {
+    private int CurrentPage = ConstantValues.FIRST_PAGE;
+    private int PageSize = ConstantValues.PAGE_SIZE;
+    private string SearchQuery = string.Empty;
+
+    private int[] PagingNumbers = ConstantValues.PAGING_NUMBERS_DEFAULT;
+
+    private bool IsOpenDeleteModal = false;
+    private CategoryVm CategoryToDelete { get; set; }
+
+    private bool IsOpenEditModal = false;
+    private CategoryVm CategorySelected;
+    private PagingData<CategoryVm> PagingCategory = new PagingData<CategoryVm>(
+        [], ConstantValues.ZERO, ConstantValues.FIRST_PAGE, ConstantValues.PAGE_SIZE);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategories();
+    }
+
+    private async Task LoadCategories()
+    {
+        PagingCategory = await CategoryService.GetCategoriesAsync(SearchQuery, CurrentPage, PageSize);
+        GeneratePageNumberItems();
+        StateHasChanged();
+    }
+
+    private async void PreviousPage()
+    {
+        if (CurrentPage > 1)
+        {
+            CurrentPage--;
+            await LoadCategories();
+        }
+    }
+
+    private async void NextPage()
+    {
+        if (CurrentPage < PagingCategory.TotalPages)
+        {
+            CurrentPage++;
+            await LoadCategories();
+        }
+    }
+
+    private async void GoToPage(int page)
+    {
+        CurrentPage = page;
+        await LoadCategories();
+    }
+
+    private async Task OnInputSearch(ChangeEventArgs e)
+    {
+        SearchQuery = e.Value?.ToString();
+
+        await LoadCategories();
+    }
+
+    // Open Delete Modal
+    private void OpenModal(CategoryVm category, ModalType modalType)
+    {
+        if (modalType == ModalType.Edit)
+        {
+            IsOpenEditModal = true;
+            CategorySelected = category ?? new CategoryVm();
+        }
+        else
+        {
+            IsOpenDeleteModal = true;
+            CategoryToDelete = category;
+        }
+    }
+
+    // Confirm Delete
+    private async Task ConfirmDelete()
+    {
+        if (CategoryToDelete != null)
+        {
+            var result = await CategoryService.DeleteCategoryAsync(CategoryToDelete.Id);
+            if (result.Succeeded)
+            {
+                ToastService.ShowSuccess($"Delete brand {CategoryToDelete.Name} successfully !!!");
+            }
+            CategoryToDelete = null;
+            await LoadCategories(); // Refresh the list after deletion
+        }
+        closeModal(ModalType.Delete);
+    }
+
+    private void closeModal(ModalType modalType)
+    {
+        if (modalType == ModalType.Edit)
+        {
+            IsOpenEditModal = false;
+            CategorySelected = null;
+        }
+        else if (modalType == ModalType.Delete)
+        {
+            IsOpenDeleteModal = false;
+            CategoryToDelete = null;
+        }
+    }
+
+    private async Task SaveBrand()
+    {
+        if (CategorySelected.Id == 0)
+        {
+            var result = await CategoryService.CreateCategoryAsync(CategorySelected);
+            if (result.Succeeded)
+            {
+                ToastService.ShowSuccess("Create new brand successfully !!!");
+            }
+        }
+        else
+        {
+            var result = await CategoryService.UpdateCategoryAsync(CategorySelected);
+            if (result.Succeeded)
+            {
+                ToastService.ShowSuccess($"Edit brand {CategorySelected.Name} successfully !!!");
+            }
+            CategorySelected = null;
+        }
+        closeModal(ModalType.Edit);
+        await LoadCategories();
+    }
+
+    private void GeneratePageNumberItems() {
+        if (PagingCategory.TotalPages > 0) {
+            var pages = new List<int>();
+            for (int i = 1; i <= PagingCategory.TotalPages; i++)
+            {
+                pages.Add(i);
+            }
+            PagingNumbers = pages.ToArray();
+        } else {
+            PagingNumbers = ConstantValues.PAGING_NUMBERS_DEFAULT;
+        }
+    }
+}

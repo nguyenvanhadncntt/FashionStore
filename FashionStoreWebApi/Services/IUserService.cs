@@ -8,7 +8,7 @@ namespace FashionStoreWebApi.Services
     {
         Task<PagingData<UserVm>> SearchUser(UserSearchRequest userSearch, PagingRequest pagingRequest);
         Task<IdentityResult> CreateUserAsync(UserCreationDTO user);
-        Task<IdentityResult> UpdateUserAsync(string userId, UserCreationDTO user);
+        Task<IdentityResult> UpdateUserAsync(UserCreationDTO user);
         Task<IdentityResult> DeleteUserAsync(string userId);
         Task<UserVm> GetUserById(string userId);
     }

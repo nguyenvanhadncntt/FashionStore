@@ -3,15 +3,16 @@
 @using FashionStoreWebApp.Services;
 @using FashionStoreWebApp.Helpers;
 @using FashionStoreWebApp.Constants;
+@using FashionStoreViewModel.Enumerations;
 @using ChangeEventArgs = Microsoft.AspNetCore.Components.ChangeEventArgs;
 
 
 @attribute [Authorize(Roles = "Admin")]
 @inject NavigationManager Navigation
-
+@inject IToastService ToastService
 @inject IBrandService BrandService
 
-<h3>Brands</h3>
+<h3>Brands Management</h3>
 
 <!-- Search Box -->
 <div class="mb-3 row">
@@ -23,14 +24,6 @@
         <button class="new-btn btn-primary" @onclick="() => OpenModal(null, ModalType.Edit)">Add new brand</button>
     </div>
 </div>
-
-<!-- Notification -->
-@if (message != null) {
-    <div class="col-auto">
-        <p class="bg-success text-white msg-notify">@message</p>
-    </div>
-}
-
 
 <!-- Brands Table -->
 <table class="table table-striped">
@@ -91,7 +84,7 @@
             <EditForm id="editBrandForm" Model="BrandSelected" OnValidSubmit="SaveBrand">
                 <ChildContent Context="formContext">
                     <div class="modal-header">
-                        <h5 class="modal-title">@(BrandSelected == null ? "Add New Brand" : $"Edit brand {BrandSelected.Name}")</h5>
+                        <h5 class="modal-title">@(BrandSelected.Id == 0 ? "Add New Brand" : $"Edit brand {BrandSelected.Name}")</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -122,36 +115,30 @@
         <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
             <button class="page-link" @onclick="PreviousPage">Previous</button>
         </li>
-        @for (int i = 1; i <= PagingBrand.TotalPages; i++)
+        @foreach (var number in PagingNumbers)
         {
-            <li class="page-item @(i == CurrentPage ? "active" : "")">
-                <button class="page-link" @onclick="() => GoToPage(i)">@i</button>
+            <li class="page-item @(number == CurrentPage ? "active" : "")">
+                <button class="page-link" @onclick="() => GoToPage(number)">@number</button>
             </li>
         }
-        <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+        <li class="page-item @(CurrentPage == PagingBrand.TotalPages ? "disabled" : "")">
             <button class="page-link" @onclick="NextPage">Next</button>
         </li>
     </ul>
 </nav>
 
 @code {
-    private int CurrentPage = 1;
-    private int PageSize = 5;
-    private int TotalBrands = 0;
+    private int CurrentPage = ConstantValues.FIRST_PAGE;
+    private int PageSize = ConstantValues.PAGE_SIZE;
     private string SearchQuery = string.Empty;
-    private int TotalPages = 0;
     private bool IsOpenDeleteModal = false;
     private BrandVm BrandToDelete { get; set; }
 
     private bool IsOpenEditModal = false;
     private BrandVm BrandSelected;
-    private PagingData<BrandVm> PagingBrand = new PagingData<BrandVm>([], 0, 1, 5);
-    private string message;
-    private enum ModalType
-    {
-        Delete,
-        Edit
-    }
+    private PagingData<BrandVm> PagingBrand = new PagingData<BrandVm>(
+        [], ConstantValues.ZERO, ConstantValues.FIRST_PAGE, ConstantValues.PAGE_SIZE);
+    private int[] PagingNumbers = ConstantValues.PAGING_NUMBERS_DEFAULT;
 
     protected override async Task OnInitializedAsync()
     {
@@ -161,8 +148,7 @@
     private async Task LoadBrands()
     {
         PagingBrand = await BrandService.GetBrands(SearchQuery, CurrentPage, PageSize);
-        TotalBrands = PagingBrand.TotalCount;
-        TotalPages = PagingBrand.TotalPages;
+        GeneratePageNumberItems();
     }
 
     private async void PreviousPage()
@@ -218,15 +204,9 @@
         {
             var result = await BrandService.Delete(BrandToDelete.Id);
             if (result.Succeeded) {
-                message = "Delete brand successfully !!!";
-                TaskDelayHelper.SetTimeout(
-                    () => {
-                        message = null;
-                        StateHasChanged();
-                    }, 
-                    ConstantValues.NOTIFY_TIME_OUT);
-
+                ToastService.ShowSuccess($"Delete brand {BrandToDelete.Name} successfully !!!");
             }
+            BrandToDelete = null;
             await LoadBrands(); // Refresh the list after deletion
         }
         closeModal(ModalType.Delete);
@@ -242,6 +222,7 @@
         else if (modalType == ModalType.Delete)
         {
             IsOpenDeleteModal = false;
+            BrandToDelete = null;
         }
     }
 
@@ -252,23 +233,35 @@
             var result = await BrandService.CreateBrandAsync(BrandSelected);
             if (result.Succeeded)
             {
-                message = "Create new brand successfully !!!";
-                TaskDelayHelper.SetTimeout(() => ResetMessage(), ConstantValues.NOTIFY_TIME_OUT);
+				ToastService.ShowSuccess("Create new brand successfully !!!");
             }
         }
         else
         {
             var result = await BrandService.UpdateBrandAsync(BrandSelected);
-            message = $"Edit brand {BrandSelected.Name} successfully !!!";
-            TaskDelayHelper.SetTimeout(() => ResetMessage(), ConstantValues.NOTIFY_TIME_OUT);
+            if (result.Succeeded) {
+                ToastService.ShowSuccess($"Edit brand {BrandSelected.Name} successfully !!!");
+            }
             BrandSelected = null;
         }
         closeModal(ModalType.Edit);
         await LoadBrands();
     }
 
-    private void ResetMessage() {
-        message = null;
-        StateHasChanged();
+    private void GeneratePageNumberItems()
+    {
+        if (PagingBrand.TotalPages > 0)
+        {
+            var pages = new List<int>();
+            for (int i = 1; i <= PagingBrand.TotalPages; i++)
+            {
+                pages.Add(i);
+            }
+            PagingNumbers = pages.ToArray();
+        }
+        else
+        {
+            PagingNumbers = ConstantValues.PAGING_NUMBERS_DEFAULT;
+        }
     }
 }

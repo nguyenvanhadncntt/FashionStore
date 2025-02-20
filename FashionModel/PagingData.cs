@@ -7,11 +7,11 @@
             TotalCount = totalCount;
             Page = page;
             PageSize = pageSize;
-            TotalPages = (int)Math.Ceiling(totalCount / (double) pageSize);
-            Items = items.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+            Items = items;
         }
 
-        public IList<T> Items { get; set; }
+        public IList<T> Items { get; set; } = new List<T>();
         public int Page { get; private set; }
         public int PageSize { get; private set; }
         public int TotalCount { get; private set; }

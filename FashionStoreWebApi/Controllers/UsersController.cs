@@ -44,10 +44,10 @@ namespace FashionStoreWebApi.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPut("{userId}")]
-        public async Task<IActionResult> UpdateUser(string userId, [FromBody] UserCreationDTO userCreation)
+        [HttpPut]
+        public async Task<IActionResult> UpdateUser([FromBody] UserCreationDTO userCreation)
         {
-            return Ok(await _userService.CreateUserAsync(userCreation));
+            return Ok(await _userService.UpdateUserAsync(userCreation));
         }
 
         [Authorize(Roles = "Admin")]
@@ -77,8 +77,8 @@ namespace FashionStoreWebApi.Controllers
         [HttpGet("current-user")]
         public async Task<IActionResult> GetCurrentUser()
         {
-            var user = await _userService.GetUserById(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            return Ok(user);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return Ok(await _userService.GetUserById(userId));
         }
     }
 }

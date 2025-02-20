@@ -79,5 +79,10 @@ namespace FashionStoreWebApi.Helpers
                 PhoneNumber = userCreation.PhoneNumber,
             };
         }
+
+        public static IList<T> ExtractItemsPaging<T>(IList<T> items, int page, int pageSize)
+        {
+            return items.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+        }
     }
 }

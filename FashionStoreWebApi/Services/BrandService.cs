@@ -50,7 +50,8 @@ namespace FashionStoreWebApi.Services
                 .Select(b => ConvertVmHelper.ConvertToBrandVm(b))
                 .ToListAsync();
 
-            return new PagingData<BrandVm>(brands, brands.Count, pagingRequest.PageNumber, pagingRequest.PageSize);
+            return new PagingData<BrandVm>(ConvertVmHelper.ExtractItemsPaging(brands, pagingRequest.PageNumber, pagingRequest.PageSize),
+                brands.Count, pagingRequest.PageNumber, pagingRequest.PageSize);
         }
 
         // Get brand by ID

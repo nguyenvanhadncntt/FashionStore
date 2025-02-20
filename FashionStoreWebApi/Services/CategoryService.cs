@@ -91,7 +91,8 @@ namespace FashionStoreWebApi.Services
                 .Select(b => ConvertVmHelper.ConvertToCategoryVm(b))
                 .ToListAsync();
 
-            return new PagingData<CategoryVm>(categories, categories.Count, pagingRequest.PageNumber, pagingRequest.PageSize);
+            return new PagingData<CategoryVm>(ConvertVmHelper.ExtractItemsPaging(categories, pagingRequest.PageNumber, pagingRequest.PageSize), 
+                categories.Count, pagingRequest.PageNumber, pagingRequest.PageSize);
         }
     }
 }

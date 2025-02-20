@@ -1,0 +1,339 @@
+﻿@page "/users"
+@using FashionStoreViewModel;
+@using FashionStoreWebApp.Services;
+@using FashionStoreWebApp.Helpers;
+@using FashionStoreWebApp.Constants;
+@using FashionStoreViewModel.Enumerations;
+@using ChangeEventArgs = Microsoft.AspNetCore.Components.ChangeEventArgs;
+
+@attribute [Authorize(Roles = "Admin")]
+
+@inject NavigationManager Navigation;
+@inject IToastService ToastService;
+@inject IUserService UserService;
+@inject IRoleService RoleService;
+
+<h3>User Management</h3>
+
+<!-- Search Box -->
+<div class="mb-3 row">
+    <div class="col-4">
+        <input type="text" class="form-control" placeholder="Search Name..."
+               @bind="NameQuery" @oninput="OnInputNameSearch" />
+    </div>
+    <div class="col-4">
+        <input type="text" class="form-control" placeholder="Search Email..."
+               @bind="EmailQuery" @oninput="OnInputEmailSearch" />
+    </div>
+    <div class="col-auto ml-auto">
+        <button class="new-btn btn-primary" @onclick="() => OpenModal(null, ModalType.Edit)">Add new user</button>
+    </div>
+</div>
+
+<!-- Brands Table -->
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+			<th>Email</th>
+            <th>Name</th>
+            <th>Phone Number</th>
+            <th>Role</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (PagingUser.TotalCount == 0)
+        {
+            <tr>
+                <td colspan="6" class="text-center">No users found.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var user in PagingUser.Items)
+            {
+                <tr>
+                    <td>@user.Id</td>
+                    <td>@user.Email</td>
+                    <td>@(user.FirstName + " " + user.LastName)</td>
+                    <td>@user.PhoneNumber</td>
+                    <td>@user.Role</td>
+                    <td>
+                        <button class="new-btn btn-warning btn-sm me-2" @onclick="() => OpenModal(user, ModalType.Edit)">Edit</button>
+                        <button class="new-btn btn-danger btn-sm" @onclick="() => OpenModal(user, ModalType.Delete)">Delete</button>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<div class="modal @(IsOpenDeleteModal ? "show" : "hide")" tabindex="-1" role="dialog" id="deleteModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the User "<strong>@(UserToDelete?.FirstName + " " + UserToDelete?.LastName)</strong>"?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="new-btn btn-secondary" data-bs-dismiss="modal" @onclick="() => closeModal(ModalType.Delete)">Cancel</button>
+                <button type="button" class="new-btn btn-danger" @onclick="ConfirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal @(IsOpenEditModal ? "show" : "hide")" tabindex="-1" role="dialog" id="EditModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <EditForm id="editBrandForm" Model="UserCreation" OnValidSubmit="SaveUser">
+                <ChildContent Context="formContext">
+                    <div class="modal-header">
+                        <h5 class="modal-title">@(string.IsNullOrEmpty(UserCreation.Id) ? "Add New User" : $"Edit User {UserCreation.FirstName + " " + UserCreation.LastName}")</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="text" class="form-control" id="email" name="email" @bind="UserCreation.Email" required />
+                            <ValidationMessage For="@(() => UserCreation.Email)" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="firstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="firstName" name="firstName" @bind="UserCreation.FirstName" required />
+                            <ValidationMessage For="@(() => UserCreation.FirstName)" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="lastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="lastName" name="lastName" @bind="UserCreation.LastName" required />
+                            <ValidationMessage For="@(() => UserCreation.LastName)" />
+                        </div>
+                        @if (string.IsNullOrEmpty(UserCreation.Id))
+                        {
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password" name="password" @bind="UserCreation.Password" />
+                                <ValidationMessage For="@(() => UserCreation.Password)" />
+                            </div>
+                        } else {
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password" name="password" @bind="UserCreation.Password" required />
+                                <ValidationMessage For="@(() => UserCreation.Password)" />
+                            </div>
+                        }
+                        <div class="mb-3">
+                            <label for="phoneNumber" class="form-label">Phone number</label>
+                            <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" @bind="UserCreation.PhoneNumber" required />
+                            <ValidationMessage For="@(() => UserCreation.PhoneNumber)" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Role</label>
+                            <select class="form-control" id="role" name="role" @bind="UserCreation.Role" required>
+                                <option value="">Select role</option>
+                                @foreach (var role in roles)
+                                {
+                                    <option value="@role.Name">@role.Name</option>
+                                }
+                            </select>
+                            <ValidationMessage For="@(() => UserCreation.Role)" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="new-btn btn-secondary" data-bs-dismiss="modal" @onclick="() => closeModal(ModalType.Edit)">Cancel</button>
+                        <button type="submit" class="new-btn btn-danger">Save</button>
+                    </div>
+                </ChildContent>
+            </EditForm>
+        </div>
+    </div>
+</div>
+<!-- Pagination -->
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+            <button class="page-link" @onclick="PreviousPage">Previous</button>
+        </li>
+        @foreach (var number in PagingNumbers)
+        {
+            <li class="page-item @(number == CurrentPage ? "active" : "")">
+                <button class="page-link" @onclick="() => GoToPage(number)">@number</button>
+            </li>
+        }
+        <li class="page-item @(CurrentPage == PagingUser.TotalPages ? "disabled" : "")">
+            <button class="page-link" @onclick="NextPage">Next</button>
+        </li>
+    </ul>
+</nav>
+
+@code {
+    private int CurrentPage = ConstantValues.FIRST_PAGE;
+    private int PageSize = ConstantValues.PAGE_SIZE;
+    private string NameQuery = string.Empty;
+    private string EmailQuery = string.Empty;
+
+    private UserCreationDTO UserCreation = new UserCreationDTO();
+    private bool IsOpenDeleteModal = false;
+    private UserVm UserToDelete { get; set; }
+
+    private bool IsOpenEditModal = false;
+    private UserVm UserSelected;
+    private PagingData<UserVm> PagingUser = new PagingData<UserVm>(
+        [], ConstantValues.ZERO, ConstantValues.FIRST_PAGE, ConstantValues.PAGE_SIZE);
+
+    private List<RoleVm> roles;
+    private int[] PagingNumbers = ConstantValues.PAGING_NUMBERS_DEFAULT;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        PagingUser = await UserService.GetPagedUsersAsync(new UserSearchRequest() {
+				Name = NameQuery,
+				Email = EmailQuery
+        }, CurrentPage, PageSize);
+        roles = await RoleService.GetRolesAsync();
+        GeneratePageNumberItems();
+    }
+
+    private async void PreviousPage()
+    {
+        if (CurrentPage > 1)
+        {
+            CurrentPage--;
+            await LoadUsers();
+        }
+    }
+
+    private async void NextPage()
+    {
+        if (CurrentPage < PagingUser.TotalPages)
+        {
+            CurrentPage++;
+            await LoadUsers();
+        }
+    }
+
+    private async void GoToPage(int page)
+    {
+        CurrentPage = page;
+        await LoadUsers();
+    }
+
+    private async Task OnInputNameSearch(ChangeEventArgs e)
+    {
+        NameQuery = e.Value?.ToString();
+        await LoadUsers();
+    }
+
+    private async Task OnInputEmailSearch(ChangeEventArgs e)
+    {
+        EmailQuery = e.Value?.ToString();
+        await LoadUsers();
+    }
+
+    // Open Delete Modal
+    private void OpenModal(UserVm user, ModalType modalType)
+    {
+        if (modalType == ModalType.Edit)
+        {
+            if (user != null) {
+                UserCreation = new UserCreationDTO()
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    PhoneNumber = user.PhoneNumber,
+                    Role = user.Role
+                };
+            } else {
+                UserCreation = new UserCreationDTO();
+            }
+            IsOpenEditModal = true;
+        }
+        else
+        {
+            IsOpenDeleteModal = true;
+            UserToDelete = user;
+        }
+    }
+
+    // Confirm Delete
+    private async Task ConfirmDelete()
+    {
+        if (UserToDelete != null)
+        {
+            var result = await UserService.DeleteUserAsync(UserToDelete.Id);
+            if (result.Succeeded)
+            {
+                ToastService.ShowSuccess($"Delete User {UserToDelete?.FirstName + " " + UserToDelete?.LastName} successfully !!!");
+            }
+            UserToDelete = null;
+            await LoadUsers(); // Refresh the list after deletion
+        }
+        closeModal(ModalType.Delete);
+    }
+
+    private void closeModal(ModalType modalType)
+    {
+        if (modalType == ModalType.Edit)
+        {
+            IsOpenEditModal = false;
+            UserSelected = null;
+        }
+        else if (modalType == ModalType.Delete)
+        {
+            IsOpenDeleteModal = false;
+            UserToDelete = null;
+        }
+    }
+
+    private async Task SaveUser()
+    {
+        if (string.IsNullOrEmpty(UserCreation.Id))
+        {
+            var result = await UserService.CreateUserAsync(UserCreation);
+            if (result.Succeeded)
+            {
+                ToastService.ShowSuccess("Create new brand successfully !!!");
+            }
+        }
+        else
+        {
+            var result = await UserService.UpdateUserAsync(UserCreation);
+            if (result.Succeeded)
+            {
+                ToastService.ShowSuccess($"Edit User {UserCreation.Email} successfully !!!");
+            }
+            UserCreation = null;
+        }
+        closeModal(ModalType.Edit);
+        await LoadUsers();
+    }
+
+    private void GeneratePageNumberItems()
+    {
+        if (PagingUser.TotalPages > 0)
+        {
+            var pages = new List<int>();
+            for (int i = 1; i <= PagingUser.TotalPages; i++)
+            {
+                pages.Add(i);
+            }
+            PagingNumbers = pages.ToArray();
+        }
+        else
+        {
+            PagingNumbers = ConstantValues.PAGING_NUMBERS_DEFAULT;
+        }
+    }
+}

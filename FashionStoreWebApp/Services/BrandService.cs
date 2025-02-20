@@ -22,30 +22,18 @@ namespace FashionStoreWebApp.Services
                 return new FormResult { Succeeded = true };
             }
 
-            var errors = ErrorResponseHelper.GetErrorMsgFromResponse(await result.Content.ReadAsStringAsync());
-
-            return new FormResult
-            {
-                Succeeded = false,
-                ErrorList = !errors.Any() ? ["Has some error happen, please contract admin"] : [.. errors]
-            };
+            return await ErrorResponseHelper.ConvertToFormResultError(result);
         }
 
         public async Task<FormResult> Delete(long id)
         {
-            var response = await _httpClient.DeleteAsync($"/api/Brands?brandId={id}");
+            var response = await _httpClient.DeleteAsync($"/api/Brands/{id}");
             if (response.IsSuccessStatusCode)
             {
                 return new FormResult() { Succeeded = true };
             }
 
-            var errors = ErrorResponseHelper.GetErrorMsgFromResponse(await response.Content.ReadAsStringAsync());
-
-            return new FormResult
-            {
-                Succeeded = false,
-                ErrorList = !errors.Any() ? ["Has some error happen, please contract admin"] : [.. errors]
-            };
+            return await ErrorResponseHelper.ConvertToFormResultError(response);
 
         }
 
@@ -59,7 +47,7 @@ namespace FashionStoreWebApp.Services
 
         public async Task<PagingData<BrandVm>> GetBrands(string name, int pageIndex, int pageSize)
         {
-            var response = await _httpClient.GetAsync($"/api/Brands?name={name}&pageIndex={pageIndex}&pageSize={pageSize}");
+            var response = await _httpClient.GetAsync($"/api/Brands?name={name}&pageNumber={pageIndex}&pageSize={pageSize}");
             response.EnsureSuccessStatusCode();
             var brandJson = await response.Content.ReadAsStringAsync();
             var result = JsonSerializer.Deserialize<PagingData<BrandVm>>(brandJson, ConstantValues.jsonSerializerOptions);
@@ -74,13 +62,7 @@ namespace FashionStoreWebApp.Services
                 return new FormResult { Succeeded = true };
             }
 
-            var errors = ErrorResponseHelper.GetErrorMsgFromResponse(await result.Content.ReadAsStringAsync());
-
-            return new FormResult
-            {
-                Succeeded = false,
-                ErrorList = !errors.Any() ? ["Has some errors happen, please contract admin"] : [.. errors]
-            };
+            return await ErrorResponseHelper.ConvertToFormResultError(result);
         }
     }
 }

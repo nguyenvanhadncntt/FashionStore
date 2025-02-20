@@ -58,9 +58,9 @@ namespace FashionStoreWebApi.Services
             };
         }
 
-        public async Task<IdentityResult> UpdateUserAsync(string userId, UserCreationDTO userDto)
+        public async Task<IdentityResult> UpdateUserAsync(UserCreationDTO userDto)
         {
-            User? user = await _userManager.FindByIdAsync(userId);
+            User? user = await _userManager.FindByIdAsync(userDto.Id);
             if (user == null)
             {
                 return IdentityResult.Failed(new IdentityError { Description = "User not found." });
@@ -142,7 +142,8 @@ namespace FashionStoreWebApi.Services
                 });
             }
 
-            return new PagingData<UserVm>(userVms, userVms.Count, pagingRequest.PageNumber, pagingRequest.PageSize);
+            return new PagingData<UserVm>(ConvertVmHelper.ExtractItemsPaging(userVms, pagingRequest.PageNumber, pagingRequest.PageSize),
+                userVms.Count, pagingRequest.PageNumber, pagingRequest.PageSize);
         }
     }
 }

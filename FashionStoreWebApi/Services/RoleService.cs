@@ -32,9 +32,9 @@ namespace FashionStoreWebApi.Services
             }
         }
 
-        public async Task<bool> deleteRole(string roleName)
+        public async Task<bool> deleteRole(string roleId)
         {
-            Role? role = await _roleManager.FindByNameAsync(roleName);
+            Role? role = await _roleManager.FindByIdAsync(roleId);
             if (role == null)
             {
                 throw new Exception("Role not found");
@@ -49,6 +49,16 @@ namespace FashionStoreWebApi.Services
             return _roleManager.Roles.Select(r =>
                 new RoleVm { Id = Guid.Parse(r.Id), Name = r.Name })
                 .ToListAsync();
+        }
+
+        public async Task<RoleVm> GetRoleVmById(string roleId)
+        {
+            Role? role = await _roleManager.FindByIdAsync(roleId);
+            if (role == null)
+            {
+                throw new Exception("Role not found");
+            }
+            return new RoleVm { Id = Guid.Parse(role.Id), Name = role.Name };
         }
 
         public async Task<RoleVm> UpdateRole(RoleVm roleVm)

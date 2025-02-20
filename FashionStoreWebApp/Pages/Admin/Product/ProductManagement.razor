@@ -1,0 +1,198 @@
+﻿@page "/products"
+@using FashionStoreViewModel;
+@using FashionStoreWebApp.Services;
+@using FashionStoreWebApp.Helpers;
+@using FashionStoreWebApp.Constants;
+@using FashionStoreViewModel.Enumerations;
+@using ChangeEventArgs = Microsoft.AspNetCore.Components.ChangeEventArgs;
+
+@attribute [Authorize(Roles = "Admin")]
+
+@inject NavigationManager Navigation;
+@inject IToastService ToastService;
+@inject IProductService ProductService;
+
+<h3>Product Management</h3>
+
+<!-- Search Box -->
+<div class="mb-3 row">
+    <div class="col-4">
+        <input type="text" class="form-control" placeholder="Search Name..."
+               @bind="NameQuery" @oninput="OnInputNameSearch" />
+    </div>
+    <div class="col-auto ml-auto">
+        <button class="new-btn btn-primary" @onclick="() => GoToCreateProductPage()">Add new product</button>
+    </div>
+</div>
+
+<!-- Brands Table -->
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>StockQuantity</th>
+            <th>Brand</th>
+            <th>Category</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (PagingProduct.TotalCount == 0)
+        {
+            <tr>
+                <td colspan="8" class="text-center">No products found.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var product in PagingProduct.Items)
+            {
+                <tr>
+                    <td>@product.Id</td>
+                    <td>@product.Name</td>
+                    <td>@product.Description</td>
+                    <td>@product.Price</td>
+                    <td>@product.StockQuantity</td>
+                    <td>@product.BrandName</td>
+                    <td>@product.CategoryName</td>
+                    <td>
+                        <button class="new-btn btn-warning btn-sm me-2" @onclick="() => GotoEditPage(product)">Edit</button>
+                        <button class="new-btn btn-danger btn-sm" @onclick="() => OpenDeleteModal(product)">Delete</button>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<div class="modal @(IsOpenDeleteModal ? "show" : "hide")" tabindex="-1" role="dialog" id="deleteModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the product "<strong>@ProductToDelete?.Name</strong>"?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="new-btn btn-secondary" data-bs-dismiss="modal" @onclick="() => CloseDeleteModal()">Cancel</button>
+                <button type="button" class="new-btn btn-danger" @onclick="ConfirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private int CurrentPage = ConstantValues.FIRST_PAGE;
+    private int PageSize = ConstantValues.PAGE_SIZE;
+    private string NameQuery = string.Empty;
+
+    private bool IsOpenDeleteModal = false;
+    private ProductVm? ProductToDelete { get; set; }
+
+    private PagingData<ProductVm> PagingProduct = new PagingData<ProductVm>(
+        [], ConstantValues.ZERO, ConstantValues.FIRST_PAGE, ConstantValues.PAGE_SIZE);
+
+    private int[] PagingNumbers = ConstantValues.PAGING_NUMBERS_DEFAULT;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProducts();
+    }
+
+    private async Task LoadProducts()
+    {
+        PagingProduct = await ProductService.SearchProduct(NameQuery, CurrentPage, PageSize);
+        GeneratePageNumberItems();
+        StateHasChanged();
+    }
+
+    private async void PreviousPage()
+    {
+        if (CurrentPage > 1)
+        {
+            CurrentPage--;
+            await LoadProducts();
+        }
+    }
+
+    private async void NextPage()
+    {
+        if (CurrentPage < PagingProduct.TotalPages)
+        {
+            CurrentPage++;
+            await LoadProducts();
+        }
+    }
+
+    private async void GoToPage(int page)
+    {
+        CurrentPage = page;
+        await LoadProducts();
+    }
+
+    private async Task OnInputNameSearch(ChangeEventArgs e)
+    {
+        NameQuery = e.Value?.ToString();
+        await LoadProducts();
+    }
+
+    // Open Delete Modal
+    private void OpenDeleteModal(ProductVm productVm)
+    {
+        IsOpenDeleteModal = true;
+        ProductToDelete = productVm ?? new ProductVm();
+    }
+
+    // Confirm Delete
+    private async Task ConfirmDelete()
+    {
+        if (ProductToDelete != null)
+        {
+            var result = await ProductService.DeleteProductAsync(ProductToDelete.Id);
+            if (result.Succeeded)
+            {
+                ToastService.ShowSuccess($"Delete Product {ProductToDelete.Name} successfully !!!");
+            }
+            await LoadProducts(); // Refresh the list after deletion
+        }
+        CloseDeleteModal();
+    }
+
+    private void GotoEditPage(ProductVm product)
+	{
+		Navigation.NavigateTo($"/products/{product.Id}");
+	}
+
+	private void GoToCreateProductPage()
+	{
+		Navigation.NavigateTo("/products/new");
+	}
+
+    private void CloseDeleteModal()
+    {
+        IsOpenDeleteModal = false;
+        ProductToDelete = null;
+    }
+
+    private void GeneratePageNumberItems()
+    {
+        if (PagingProduct.TotalPages > 0)
+        {
+            var pages = new List<int>();
+            for (int i = 1; i <= PagingProduct.TotalPages; i++)
+            {
+                pages.Add(i);
+            }
+            PagingNumbers = pages.ToArray();
+        }
+        else
+        {
+            PagingNumbers = ConstantValues.PAGING_NUMBERS_DEFAULT;
+        }
+    }
+}

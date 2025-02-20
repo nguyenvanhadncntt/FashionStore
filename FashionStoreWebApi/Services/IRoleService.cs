@@ -10,6 +10,7 @@ namespace FashionStoreWebApi.Services
 
         Task<RoleVm> AddRoleAsync(string role);
 
-        Task<bool> deleteRole(string role);
+        Task<bool> deleteRole(string roleId);
+        Task<RoleVm> GetRoleVmById(string roleId);
     }
 }
