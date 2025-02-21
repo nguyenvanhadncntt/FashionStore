@@ -13,7 +13,7 @@ namespace FashionStoreWebApi.Services
         {
             _context = context;
         }
-        public async Task<Cart> AddToCartAsync(string userId, long productId, long quantity)
+        public async Task<CartVm> AddToCartAsync(string userId, long productId, long quantity)
         {
             var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == productId);
 
@@ -26,7 +26,13 @@ namespace FashionStoreWebApi.Services
                 {
                     existingCartItem.Quantity += quantity;
                     await _context.SaveChangesAsync();
-                    return existingCartItem;
+                    return new CartVm()
+                    {
+                        UserId = userId,
+                        ProductId = productId,
+                        Quantity = existingCartItem.Quantity,
+                        AddedAt = DateTime.UtcNow
+                    };
                 } else
                 {
                     throw new Exception("Product quanlity out of stock!");
@@ -43,7 +49,13 @@ namespace FashionStoreWebApi.Services
 
             _context.Carts.Add(cartItem);
             await _context.SaveChangesAsync();
-            return cartItem;
+            return new CartVm()
+            {
+                UserId = userId,
+                ProductId = productId,
+                Quantity = cartItem.Quantity,
+                AddedAt = DateTime.UtcNow
+            };
         }
 
         // Get all cart items for a user
@@ -52,12 +64,16 @@ namespace FashionStoreWebApi.Services
             return await _context.Carts
                 .Where(c => c.UserId == userId)
                 .Include(c => c.Product)
+                .Include(c => c.User)
                 .Select(c => new CartVm()
                 {
                     Id = c.Id,
                     ProductId = c.ProductId,
                     ProductName = c.Product.Name,
                     ProductImageUrl = c.Product.ImageUrl,
+                    Price = c.Product.Price,
+                    UserId = c.UserId,
+                    UserName = c.User.FirstName + " " + c.User.LastName,
                     Quantity = c.Quantity,
                     AddedAt = c.AddedAt,
                 })
@@ -83,7 +99,7 @@ namespace FashionStoreWebApi.Services
         }
 
         // Remove item from cart
-        public async Task<bool> RemoveFromCartAsync(int cartItemId)
+        public async Task<bool> RemoveFromCartAsync(long cartItemId)
         {
             var cartItem = await _context.Carts.FindAsync(cartItemId);
             if (cartItem == null)

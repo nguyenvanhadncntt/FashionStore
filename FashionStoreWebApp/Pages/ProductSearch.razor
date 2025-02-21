@@ -7,13 +7,13 @@
 @inject IJSRuntime JS;
 @using ChangeEventArgs = Microsoft.AspNetCore.Components.ChangeEventArgs;
 
-@attribute [Authorize(Roles = "Admin")]
-
 @inject NavigationManager Navigation;
 @inject IToastService ToastService;
 @inject IProductService ProductService;
 @inject ICategoryService CategoryService;
 @inject IBrandService BrandService;
+@inject ICartService CartService;
+@inject AuthenticationStateProvider AuthStateProvider;
 
 <PageTitle>Product Search</PageTitle>
 
@@ -183,7 +183,7 @@
                                 </div>
                                 <div class="product__item__text">
                                     <h6>@product.Name</h6>
-                                    <a href="#" class="add-cart">+ Add To Cart</a>
+                                    <a @onclick="() => AddToCart(product.Id)" class="add-cart">+ Add To Cart</a>
                                     <div class="rating">
                                         <i class="fa fa-star"></i>
                                         <i class="fa fa-star"></i>
@@ -229,9 +229,11 @@
     private PagingData<ProductVm> PagingProducts = new PagingData<ProductVm>([], ConstantValues.ZERO, ConstantValues.FIRST_PAGE, 9);
 
     private int[] PagingNumbers = ConstantValues.PAGING_NUMBERS_DEFAULT;
+    AuthenticationState AuthState;
 
     protected override async Task OnInitializedAsync()
     {
+        AuthState = await AuthStateProvider.GetAuthenticationStateAsync();
         await FetchCategories();
 		await FetchBrands();
         await FetchProducts();
@@ -310,4 +312,28 @@
         var endElementNumber = startElementNumber + PagingProducts.Items.Count - 1;
         return $"Showing {startElementNumber} - {endElementNumber} of {PagingProducts.TotalCount} results";
 	}
+
+    private async Task AddToCart(long productId)
+    {
+        if (!AuthState.User.Identity.IsAuthenticated)
+        {
+            ToastService.ShowError("Please login to add product to cart.");
+            return;
+        }
+
+        var result = await CartService.AddToCart(new CartVm()
+            {
+                ProductId = productId,
+                Quantity = ConstantValues.ONE,
+            });
+
+        if (result.Succeeded)
+        {
+            ToastService.ShowSuccess("Product added to cart successfully.");
+        }
+        else
+        {
+            ToastService.ShowError("Failed to add product to cart.");
+        }
+    }
 }

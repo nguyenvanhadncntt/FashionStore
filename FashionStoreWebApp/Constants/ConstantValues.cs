@@ -13,6 +13,7 @@ namespace FashionStoreWebApp.Constants
         public const int FIRST_PAGE = 1;
         public const int PAGE_SIZE = 5;
         public const int ZERO = 0;
+        public const int ONE = 1;
         public const int MAX_PAGE_SIZE = int.MaxValue;
         public static readonly int[] PAGING_NUMBERS_DEFAULT = { 1 };
         public static readonly string BACKEND_URL = "https://localhost:7012";

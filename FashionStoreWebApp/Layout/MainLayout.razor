@@ -3,6 +3,7 @@
 @using Blazored.Toast.Configuration;
 @using FashionStoreWebApp.Constants;
 @using FashionStoreWebApp.Layout.Footer;
+@using FashionStoreViewModel.Constants;
 
 @inject AuthenticationStateProvider AuthStateProvider
 
@@ -46,10 +47,9 @@ else {
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-        Console.WriteLine(user.ToString());
         if (user != null && user.Identity.IsAuthenticated)
         {
-            isAdmin = user.IsInRole("Admin");
+            isAdmin = user.IsInRole(RoleConstants.ROLE_ADMIN);
         }
     }
 

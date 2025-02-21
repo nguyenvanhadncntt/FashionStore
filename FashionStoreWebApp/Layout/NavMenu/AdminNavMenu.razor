@@ -30,7 +30,7 @@
             <a href="/orders" class="list-group-item list-group-item-action bg-light">
                 <i class="fa-solid fa-money-check-dollar ml-4 mr-2"></i> Orders
             </a>
-            <a class="list-group-item list-group-item-action bg-light" @onclick="logout">
+            <a class="list-group-item list-group-item-action bg-light" @onclick="Logout">
                 <i class="fa-solid fa-right-from-bracket ml-4 mr-2"></i> Logout
             </a>
         </div>
@@ -85,8 +85,8 @@
         collapseNavMenu = !collapseNavMenu;
     }
 
-    private async Task logout() {
+    private async Task Logout() {
         await AccountManagementService.LogoutAsync();
-        Navigation.NavigateTo("/", forceLoad: true);
+        Navigation.NavigateTo("/", true);
     }
 }

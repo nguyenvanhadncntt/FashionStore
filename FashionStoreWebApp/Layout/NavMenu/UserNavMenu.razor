@@ -3,7 +3,6 @@
 @inject NavigationManager Navigation
 @inject IAccountManagementService AccountManagementService
 
-
 <!-- Header Section Begin -->
 <header class="header">
     <div class="header__top">
@@ -16,18 +15,23 @@
                 </div>
                 <div class="col-lg-6 col-md-5">
                     <div class="header__top__right">
-                        <div class="header__top__links">
-                            <a href="/login">Sign in</a>
-                            <a href="/register">Register</a>
-                        </div>
-                        <div class="header__top__hover">
-                            <span>Usd <i class="fa-solid fa-caret-down"></i></span>
-                            <ul>
-                                <li>USD</li>
-                                <li>EUR</li>
-                                <li>USD</li>
-                            </ul>
-                        </div>
+                        <AuthorizeView>
+                            <Authorized>
+                                <div class="header__top__hover">
+                                    <span>Hi, @context.User.Identity?.Name <i class="fa-solid fa-caret-down"></i></span>
+                                    <ul class="user-dropdown">
+                                        <li class="custom-dropdown-item">Orders</li>
+                                        <li class="custom-dropdown-item"  @onclick="Logout">Logout</li>
+                                    </ul>
+                                </div>
+                            </Authorized>
+                            <NotAuthorized>
+                                <div class="header__top__links">
+                                    <a href="/login">Sign in</a>
+                                    <a href="/register">Register</a>
+                                </div>
+                            </NotAuthorized>
+                        </AuthorizeView>
                     </div>
                 </div>
             </div>
@@ -62,9 +66,9 @@
             </div>
             <div class="col-lg-3 col-md-3">
                 <div class="header__nav__option">
-                    <a href="#" class="search-switch"><img src="img/icon/search.png" alt=""></a>
+                    <a href="search-product" class="search-switch"><img src="img/icon/search.png" alt=""></a>
                     <a href="#"><img src="img/icon/heart.png" alt=""></a>
-                    <a href="#"><img src="img/icon/cart.png" alt=""></a>
+                    <a href="cart"><img src="img/icon/cart.png" alt=""></a>
                 </div>
             </div>
         </div>
@@ -73,8 +77,22 @@
 </header>
 <!-- Header Section End -->
 
+<style>
+    .user-dropdown {
+        background-color: #111111 !important;
+        text-align: center;
+        left: auto !important;
+        right: 0 !important;
+        width: 150px;
+    }
+    .custom-dropdown-item {
+        color: white !important;
+        font-size: 16px !important;
+    }
+</style>
+
 @code {
-    private async Task logout()
+    private async Task Logout()
     {
         await AccountManagementService.LogoutAsync();
         Navigation.NavigateTo("/", true);

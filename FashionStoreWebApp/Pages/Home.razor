@@ -6,6 +6,9 @@
 @using FashionStoreViewModel.Enumerations;
 
 @inject IProductService ProductService;
+@inject ICartService CartService;
+@inject IToastService ToastService;
+@inject AuthenticationStateProvider AuthStateProvider;
 
 <PageTitle>Home</PageTitle>
 
@@ -33,11 +36,11 @@
                     <h2>Multi-pocket Chest Bag Black</h2>
                     <div class="categories__deal__countdown__timer" id="countdown">
                         <div class="cd-item">
-                            <span>3</span>
+                            <span>03</span>
                             <p>Days</p>
                         </div>
                         <div class="cd-item">
-                            <span>1</span>
+                            <span>01</span>
                             <p>Hours</p>
                         </div>
                         <div class="cd-item">
@@ -123,7 +126,7 @@
                         </div>
                         <div class="product__item__text">
                             <h6>@product.Name</h6>
-                            <a href="#" class="add-cart">+ Add To Cart</a>
+                            <a @onclick="() => AddToCart(product.Id)" class="add-cart">+ Add To Cart</a>
                             <div class="rating">
                                 <i class="fa fa-star"></i>
                                 <i class="fa fa-star"></i>
@@ -218,9 +221,11 @@
 @code {
     private int PageSize = 8;
     PagingData<ProductVm> PagingProduct = new PagingData<ProductVm>([], ConstantValues.ZERO, ConstantValues.FIRST_PAGE, 8);
+	AuthenticationState AuthState;
 
     protected override async Task OnInitializedAsync()
     {
+        AuthState = await AuthStateProvider.GetAuthenticationStateAsync();
         await FetchProducts(1);
     }
 
@@ -237,5 +242,24 @@
 				brandId = ConstantValues.ZERO,
         }, pageIndex, PageSize);
         StateHasChanged();
+    }
+
+    private async Task AddToCart(long productId) {
+		if (!AuthState.User.Identity.IsAuthenticated)
+		{
+			ToastService.ShowError("Please login to add product to cart.");
+			return;
+		}
+
+		var result = await CartService.AddToCart(new CartVm() {
+				ProductId = productId,
+				Quantity = ConstantValues.ONE,
+        });
+
+        if (result.Succeeded) {
+			ToastService.ShowSuccess("Product added to cart successfully.");
+        } else {
+            ToastService.ShowError("Failed to add product to cart.");
+        }
     }
 }

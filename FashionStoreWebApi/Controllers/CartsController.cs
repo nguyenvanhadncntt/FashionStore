@@ -58,7 +58,7 @@ namespace FashionStoreWebApi.Controllers
         }
 
         [HttpDelete("{cartItemId}")]
-        public async Task<IActionResult> RemoveFromCart(int cartItemId)
+        public async Task<IActionResult> RemoveFromCart(long cartItemId)
         {
             return Ok(await _cartService.RemoveFromCartAsync(cartItemId));
         }
