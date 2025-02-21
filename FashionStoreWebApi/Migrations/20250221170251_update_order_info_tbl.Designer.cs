@@ -4,6 +4,7 @@ using FashionStoreWebApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FashionStoreWebApi.Migrations
 {
     [DbContext(typeof(FashionStoreDbContext))]
-    partial class FashionStoreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250221170251_update_order_info_tbl")]
+    partial class update_order_info_tbl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,16 +60,12 @@ namespace FashionStoreWebApi.Migrations
                     b.Property<long>("ProductId")
                         .HasColumnType("bigint");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
+                    b.Property<long>("Quantity")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<Guid>("Version")
-                        .IsConcurrencyToken()
-                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -105,9 +104,6 @@ namespace FashionStoreWebApi.Migrations
                         .HasColumnType("bigint");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("ContactEmail")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ContactName")
                         .IsRequired()
@@ -219,10 +215,6 @@ namespace FashionStoreWebApi.Migrations
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<Guid>("Version")
-                        .IsConcurrencyToken()
-                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 

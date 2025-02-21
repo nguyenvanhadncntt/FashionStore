@@ -15,7 +15,7 @@
 @inject ICategoryService CategoryService;
 @inject IBrandService BrandService;
 
-<h3>@(Product.Id == 0 ? "Add New Product" : $"Edit Product {Product.Name}")</h3>
+<h3 class="mb-4">@(Product.Id == 0 ? "Add New Product" : $"Edit Product '{Product.Name}''")</h3>
 
 <EditForm Model="Product" OnValidSubmit="HandleSubmit">
     <DataAnnotationsValidator />
@@ -70,11 +70,8 @@
     <!-- Product Image Upload -->
     <div class="form-group">
         <label for="productImage">Upload Image</label>
-        <InputFile id="productImage" OnChange="HandleFileSelected" />
-        @if (!string.IsNullOrEmpty(imagePreviewUrl))
-        {
-        }
-        <img src="https://localhost:7012/@Product.ImageUrl" alt="Image Preview" class="image-preview" style="max-width: 200px; max-height: 200px; margin-top: 10px;" />
+        <InputFile id="productImage" class="form-control" OnChange="HandleFileSelected" />
+        <img src="@imagePreviewUrl" alt="Image Preview" class="image-preview" style="max-width: 200px; max-height: 200px; margin-top: 10px;" />
     </div>
 
     <!-- Stock Quantity -->
@@ -118,6 +115,9 @@
     {
         if (productId > 0) {
             Product = await ProductService.GetByIdAsync(productId);
+            if (Product.ImageUrl != null) {
+                imagePreviewUrl = GetImageUrl(Product.ImageUrl);
+            }
         } else {
             Product = new ProductVm();
         }
@@ -139,6 +139,11 @@
     private async Task HandleFileSelected(InputFileChangeEventArgs e)
     {
         selectedFile = e.File;
+        using var stream = selectedFile.OpenReadStream(10 * 1024 * 1024);
+        var buffer = new byte[selectedFile.Size];
+        await stream.ReadAsync(buffer, 0, (int)selectedFile.Size);
+        imagePreviewUrl = $"data:{selectedFile.ContentType};base64,{Convert.ToBase64String(buffer)}";
+        StateHasChanged();
     }
 
     private async Task HandleSubmit()
@@ -184,5 +189,10 @@
     private void Cancel()
     {
         Navigation.NavigateTo("/products"); // Redirect to product list
+    }
+
+    private string GetImageUrl(string imageName)
+    {
+        return $"{ConstantValues.BACKEND_URL}/{imageName}";
     }
 }

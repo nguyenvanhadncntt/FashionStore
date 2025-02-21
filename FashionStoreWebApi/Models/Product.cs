@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.ViewEngines;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ViewEngines;
 
 namespace FashionStoreWebApi.Models
 {
@@ -19,5 +20,8 @@ namespace FashionStoreWebApi.Models
         public Brand Brand { get; set; }
         public IList<OrderItem> OrderItems { get; set; }
         public IList<Cart> CartItems { get; set; }
+
+        [ConcurrencyCheck]
+        public Guid Version { get; set; }
     }
 }

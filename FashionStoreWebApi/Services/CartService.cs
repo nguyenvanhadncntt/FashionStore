@@ -13,7 +13,7 @@ namespace FashionStoreWebApi.Services
         {
             _context = context;
         }
-        public async Task<CartVm> AddToCartAsync(string userId, long productId, long quantity)
+        public async Task<CartVm> AddToCartAsync(string userId, long productId, int quantity)
         {
             var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == productId);
 
@@ -81,7 +81,7 @@ namespace FashionStoreWebApi.Services
         }
 
         // Update cart item quantity
-        public async Task<bool> UpdateCartItemQuantityAsync(long cartItemId, long newQuantity)
+        public async Task<bool> UpdateCartItemQuantityAsync(long cartItemId, int newQuantity)
         {
             var cartItem = await _context.Carts.FindAsync(cartItemId);
 

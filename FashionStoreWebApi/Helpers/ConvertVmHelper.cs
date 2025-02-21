@@ -44,6 +44,10 @@ namespace FashionStoreWebApi.Helpers
                 PaymentMethod = order.PaymentMethod,
                 PaymentStatus = order.PaymentStatus,
                 ShippingAddress = order.ShippingAddress,
+                ContactName = order.ContactName,
+                ContactPhoneNumber = order.ContactPhoneNumber,
+                ContactEmail = order.ContactEmail,
+                OrderNote = order.OrderNote,
                 CreatedAt = order.CreatedAt
             };
         }

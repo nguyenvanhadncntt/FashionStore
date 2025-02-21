@@ -9,7 +9,7 @@ namespace FashionStoreWebApp.Constants
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         };
 
-        public const int NOTIFY_TIME_OUT = 5;
+        public const int NOTIFY_TIME_OUT = 3;
         public const int FIRST_PAGE = 1;
         public const int PAGE_SIZE = 5;
         public const int ZERO = 0;

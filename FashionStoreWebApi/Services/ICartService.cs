@@ -5,9 +5,9 @@ namespace FashionStoreWebApi.Services
 {
     public interface ICartService
     {
-        Task<CartVm> AddToCartAsync(string userId, long productId, long quantity);
+        Task<CartVm> AddToCartAsync(string userId, long productId, int quantity);
         Task<IList<CartVm>> GetCartItemsByUserId(string userId);
-        Task<bool> UpdateCartItemQuantityAsync(long cartItemId, long newQuantity);
+        Task<bool> UpdateCartItemQuantityAsync(long cartItemId, int newQuantity);
         Task<bool> RemoveFromCartAsync(long cartItemId);
         Task<bool> ClearCartAsync(string userId);
     }

@@ -18,58 +18,78 @@ namespace FashionStoreWebApi.Services
 
         public async Task PlaceOrderAsync(string userId, OrderVm orderVm)
         {
-            var productIds = orderVm.OrderItems.Select(oi => oi.ProductId).ToList();
+            using var transaction = await _context.Database.BeginTransactionAsync();
 
-            var products = await _context.Products
-                .Where(p => productIds.Contains(p.Id))
-                .ToListAsync();
-
-            // Validate products quantity
-            ValidateProductsQuantity(orderVm, products);
-
-            // Create the order
-            var order = new Order
+            try
             {
-                UserId = userId,
-                TotalAmount = orderVm.TotalAmount,
-                Status = OrderStatus.Pending,
-                PaymentMethod = PaymentMethod.COD,
-                PaymentStatus = PaymentStatus.PENDING,
-                ShippingAddress = orderVm.ShippingAddress,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
+                var productIds = orderVm.OrderItems.Select(oi => oi.ProductId).ToList();
 
-            _context.Orders.Add(order);
-            await _context.SaveChangesAsync();
+                var products = await _context.Products
+                    .Where(p => productIds.Contains(p.Id))
+                    .ToListAsync();
 
-            // Add order items
-            foreach (var orderItemVm in orderVm.OrderItems)
-            {
-                var orderItem = new OrderItem
+                // Validate products quantity
+                ValidateProductsQuantity(orderVm, products);
+
+                // Create the order
+                var order = new Order
                 {
-                    OrderId = order.Id,
-                    ProductId = orderItemVm.ProductId,
-                    Quantity = orderItemVm.Quantity,
-                    Price = orderItemVm.Price
+                    UserId = userId,
+                    TotalAmount = orderVm.TotalAmount,
+                    Status = OrderStatus.Created,
+                    PaymentMethod = PaymentMethod.COD,
+                    PaymentStatus = PaymentStatus.PENDING,
+                    ShippingAddress = orderVm.ShippingAddress,
+                    ContactName = orderVm.ContactName,
+                    ContactPhoneNumber = orderVm.ContactPhoneNumber,
+                    ContactEmail = orderVm.ContactEmail,
+                    OrderNote = orderVm.OrderNote,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 };
 
-                _context.OrderItems.Add(orderItem);
+                _context.Orders.Add(order);
+                await _context.SaveChangesAsync();
 
-                // Update product stock
-                var product = products.FirstOrDefault(p => p.Id == orderItemVm.ProductId);
-                product.StockQuantity -= orderItemVm.Quantity;
+                // Add order items
+                foreach (var orderItemVm in orderVm.OrderItems)
+                {
+                    var orderItem = new OrderItem
+                    {
+                        OrderId = order.Id,
+                        ProductId = orderItemVm.ProductId,
+                        Quantity = orderItemVm.Quantity,
+                        Price = orderItemVm.Price
+                    };
+
+                    _context.OrderItems.Add(orderItem);
+
+                    // Update product stock
+                    var product = products.FirstOrDefault(p => p.Id == orderItemVm.ProductId);
+                    product.StockQuantity -= orderItemVm.Quantity;
+                    _context.Products.Update(product);
+                }
+
+                // Remove carts
+                var cartIds = orderVm.OrderItems.Select(oi => oi.cartId).ToList();
+                await _context.Carts
+                    .Where(c => cartIds.Contains(c.Id)).ExecuteDeleteAsync();
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
             }
-
-            // remove carts
-            var cartIds = orderVm.OrderItems.Select(oi => oi.cartId).ToList();
-            var cartItems = await _context.Carts
-                .Where(c => cartIds.Contains(c.Id))
-                .ToListAsync();
-
-            _context.Carts.RemoveRange(cartItems);
-
-            await _context.SaveChangesAsync();
+            //catch (DbUpdateConcurrencyException ex)
+            //{
+            //    foreach (var entry in ex.Entries)
+            //    {
+            //        entry.Reload(); // Reload the entity from the database
+            //    }
+            //}
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         private void ValidateProductsQuantity(OrderVm orderVm, IList<Product> products)

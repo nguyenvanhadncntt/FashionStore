@@ -2,6 +2,6 @@
 {
     public enum OrderStatus
     {
-        Pending, Shipping, Completed, Cancelled
+        Created, Pending, Shipping, Completed, Cancelled
     }
 }
