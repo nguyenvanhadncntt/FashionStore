@@ -1,0 +1,209 @@
+﻿@page "/orders/{orderId:long}/detail"
+
+@using FashionStoreViewModel;
+@using FashionStoreWebApp.Services;
+@using FashionStoreWebApp.Helpers;
+@using FashionStoreWebApp.Constants;
+@using FashionStoreViewModel.Enumerations;
+@using FashionStoreViewModel.Constants;
+@using ChangeEventArgs = Microsoft.AspNetCore.Components.ChangeEventArgs;
+
+@attribute [Authorize]
+@inject IOrderService OrderService;
+@inject NavigationManager NavigationManager;
+@inject IToastService ToastService;
+@inject AuthenticationStateProvider AuthStateProvider;
+    
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <h3 class="my-4">Order Detail</h3>
+    </Authorized>
+</AuthorizeView>
+
+@if (Order == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <AuthorizeView Roles="User">
+        <Authorized>
+            <!-- Breadcrumb Section Begin -->
+            <section class="breadcrumb-option">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="breadcrumb__text">
+                                <h4>Order Detail</h4>
+                                <div class="breadcrumb__links">
+                                    <a href="/">Home</a>
+                                    <a href="/my-orders">My Orders</a>
+                                    <span>Order Detail</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </Authorized>
+    </AuthorizeView>
+    <section class="@(isAdmin ? "" : "container product spad")">
+        <h5 class="my-4">Order Information</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Contact Name:</strong> @Order.ContactName</p>
+                <p><strong>Contact Phone:</strong> @Order.ContactPhoneNumber</p>
+                <p><strong>Contact Email:</strong> @Order.ContactEmail</p>
+                <p><strong>Total Amount:</strong> $ @Order.TotalAmount</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Status:</strong> <span class="badge text-white @(GetStatusBadgeClass(Order.Status))">@Order.Status</span></p>
+                <p><strong>Payment Method:</strong> @Order.PaymentMethod</p>
+                <p><strong>Shipping Address:</strong> @Order.ShippingAddress</p>
+                <p><strong>Created At:</strong> @Order.CreatedAt</p>
+            </div>
+        </div>
+        <div><p><strong>Order Note:</strong> @Order.OrderNote</p></div>
+        <div>
+            <h5 class="my-4">Products</h5>
+            <div class="col-lg-12">
+                <div class="shopping__cart__table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Order.OrderItems)
+                            {
+                                <tr>
+                                    <td class="product__cart__item">
+                                        <div class="product__cart__item__pic">
+                                            <img class="product-img" src="@GetImageUrl(item.ProductImageUrl)" alt="">
+                                        </div>
+                                        <div class="product__cart__item__text">
+                                            <h6>@item.ProductName</h6>
+                                            <h5>$@item.Price</h5>
+                                        </div>
+                                    </td>
+                                    <td class="quantity__item">
+                                        <div class="quantity">
+                                            <div class="pro-qty-2">
+                                                <span>@item.Quantity</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>$ @item.Price</td>
+                                    <td class="cart__price">$ @(item.Price * item.Quantity)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <AuthorizeView Roles="Admin">
+            <Authorized>
+                <div>
+                    <h5 class="my-4">Update Status</h5>
+                    <div class="row">
+                        <div class="mb-3 ml-3">
+                            <select class="form-control" id="status" @bind="Order.Status">
+                                <option value="Pending">Pending</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Shipping">Shipping</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="ml-auto">
+                            <button class="btn btn-primary" @onclick="SaveOrderStatus">Save Changes</button>
+                            <button class="btn btn-secondary ms-2" @onclick="GoBack">Back to Orders</button>
+                        </div>
+                    </div>
+                </div>
+            </Authorized> 
+        </AuthorizeView>
+        <AuthorizeView Roles="User">
+            <Authorized>
+                <div>
+                    <button class="btn btn-secondary ms-2" @onclick="GoBackMyOrders">Go Back</button>
+                </div>
+            </Authorized> 
+        </AuthorizeView>
+    </section>
+}
+
+@code {
+    [Parameter]
+    public long OrderId { get; set; }
+
+    private OrderVm Order { get; set; }
+
+    private bool isAdmin;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user != null && user.Identity.IsAuthenticated)
+        {
+            isAdmin = user.IsInRole(RoleConstants.ROLE_ADMIN);
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadOrder();
+    }
+
+    private async Task LoadOrder()
+    {
+        // Fetch the order by ID from the service
+        Order = await OrderService.GetOrderDetailAsync(OrderId);
+        StateHasChanged();
+    }
+
+    private async Task SaveOrderStatus()
+    {
+        if (Order != null)
+        {
+            await OrderService.UpdateOrderStatusAsync(Order.Id, Order.Status);
+            ToastService.ShowSuccess("Update Status order successfully!");
+            GoBack(); // Redirect back to the order list
+        }
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/admin/orders");
+    }
+
+    private void GoBackMyOrders() {
+        NavigationManager.NavigateTo("/my-orders");
+    }
+
+    // Get Status Badge Class
+    private string GetStatusBadgeClass(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Created => "bg-primary",
+            OrderStatus.Pending => "bg-warning text-dark",
+            OrderStatus.Completed => "bg-success",
+            OrderStatus.Shipping => "bg-info",
+            OrderStatus.Cancelled => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string GetImageUrl(string imageName)
+    {
+        return $"{ConstantValues.BACKEND_URL}/{imageName}";
+    }
+
+}
+

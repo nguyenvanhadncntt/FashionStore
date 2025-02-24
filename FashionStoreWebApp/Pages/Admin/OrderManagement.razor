@@ -1,0 +1,176 @@
+﻿@page "/admin/orders";
+@using FashionStoreViewModel;
+@using FashionStoreWebApp.Services;
+@using FashionStoreWebApp.Helpers;
+@using FashionStoreWebApp.Constants;
+@using FashionStoreViewModel.Enumerations;
+@using ChangeEventArgs = Microsoft.AspNetCore.Components.ChangeEventArgs;
+
+@attribute [Authorize(Roles = "Admin")]
+@inject IOrderService OrderService
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+
+<h3 class="my-4">Order Management</h3>
+
+<!-- Search Box -->
+<div class="mb-3">
+    <input type="text" class="form-control col-4" placeholder="Search Contact Name..." @bind="SearchQuery" @oninput="OnInputNameSearch" />
+</div>
+
+<!-- Orders Table -->
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>User Name</th>
+            <th>Total Amount</th>
+            <th>Status</th>
+            <th>Payment Method</th>
+            <th>Created At</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (PagingOrders.TotalCount == 0)
+        {
+            <tr>
+                <td colspan="7" class="text-center">No orders found.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var order in PagingOrders.Items)
+            {
+                <tr>
+                    <td>@order.Id</td>
+                    <td>@order.ContactName</td>
+                    <td>$ @order.TotalAmount</td>
+                    <td>
+                        <span class="badge text-white @(GetStatusBadgeClass(order.Status))">@order.Status</span>
+                    </td>
+                    <td>@order.PaymentMethod</td>
+                    <td>@order.CreatedAt.ToString()</td>
+                    <td>
+                        <button class="btn btn-sm btn-info me-2" @onclick="() => GoToDetailPage(order.Id)">View Detail</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => CancelOrder(order.Id)">Cancel Order</button>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<!-- Pagination -->
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+            <button class="page-link" @onclick="PreviousPage">Previous</button>
+        </li>
+        @foreach (var number in PagingNumbers)
+        {
+            <li class="page-item @(number == CurrentPage ? "active" : "")">
+                <button class="page-link" @onclick="() => GoToPage(number)">@number</button>
+            </li>
+        }
+        <li class="page-item @(CurrentPage == PagingOrders.TotalPages ? "disabled" : "")">
+            <button class="page-link" @onclick="NextPage">Next</button>
+        </li>
+    </ul>
+</nav>
+
+@code {
+    private PagingData<OrderVm> PagingOrders = new PagingData<OrderVm>([], ConstantValues.ZERO, ConstantValues.FIRST_PAGE, ConstantValues.PAGE_SIZE);
+    private int CurrentPage = ConstantValues.FIRST_PAGE;
+    private int PageSize = ConstantValues.PAGE_SIZE;
+    private string SearchQuery = string.Empty;
+    private OrderVm EditedOrder = new OrderVm();
+    private int[] PagingNumbers = ConstantValues.PAGING_NUMBERS_DEFAULT;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOrders();
+    }
+
+    private async Task LoadOrders()
+    {
+        PagingOrders = await OrderService.GetOrdersAsync(SearchQuery, CurrentPage, PageSize);
+        StateHasChanged();
+    }
+
+    private async Task PreviousPage()
+    {
+        if (CurrentPage > 1)
+        {
+            CurrentPage--;
+            await LoadOrders();
+        }
+    }
+
+    private async Task NextPage()
+    {
+        if (CurrentPage < PagingOrders.TotalPages)
+        {
+            CurrentPage++;
+            await LoadOrders();
+        }
+    }
+
+    private async Task GoToPage(int page)
+    {
+        CurrentPage = page;
+        await LoadOrders();
+    }
+
+    private async Task CancelOrder(long orderId)
+    {
+        bool confirm = await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to CANCELLATION this order?");
+        if (confirm)
+        {
+            await OrderService.UpdateOrderStatusAsync(orderId, OrderStatus.Cancelled);
+            await LoadOrders();
+        }
+    }
+
+    private void GoToDetailPage(long orderId) {
+        NavigationManager.NavigateTo($"/orders/{orderId}/detail");
+    }
+
+    // Get Status Badge Class
+    private string GetStatusBadgeClass(OrderStatus status)
+    {
+        return status switch
+        {
+			OrderStatus.Created => "bg-primary",
+            OrderStatus.Pending => "bg-warning text-dark",
+            OrderStatus.Completed => "bg-success",
+			OrderStatus.Shipping => "bg-info",
+            OrderStatus.Cancelled => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+
+    private void GeneratePageNumberItems()
+    {
+        if (PagingOrders.TotalPages > 0)
+        {
+            var pages = new List<int>();
+            for (int i = 1; i <= PagingOrders.TotalPages; i++)
+            {
+                pages.Add(i);
+            }
+            PagingNumbers = pages.ToArray();
+        }
+        else
+        {
+            PagingNumbers = ConstantValues.PAGING_NUMBERS_DEFAULT;
+        }
+    }
+
+    private async Task OnInputNameSearch(ChangeEventArgs e)
+    {
+        SearchQuery = e.Value?.ToString();
+        await LoadOrders();
+    }
+}
+

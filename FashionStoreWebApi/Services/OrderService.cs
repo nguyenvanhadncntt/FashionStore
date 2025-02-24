@@ -112,6 +112,7 @@ namespace FashionStoreWebApi.Services
         public async Task<OrderVm> GetOrderDetailAsync(long orderId)
         {
             var order = await _context.Orders
+                .Include(o => o.User)
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Product)
                 .FirstOrDefaultAsync(o => o.Id == orderId);
@@ -161,10 +162,16 @@ namespace FashionStoreWebApi.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<PagingData<OrderVm>> GetOrdersAsync(PagingRequest pagingRequest)
+        public async Task<PagingData<OrderVm>> GetOrdersAsync(string name, PagingRequest pagingRequest)
         {
-            var orderVms = await _context.Orders
-                .Include(o => o.OrderItems)
+            var query = _context.Orders.AsQueryable();
+
+            if (!string.IsNullOrEmpty(name))
+            {
+                query = query.Where(o => o.ContactName.ToLower().Contains(name.ToLower()));
+            }
+
+            var orderVms = await query.Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Product)
                 .Select(o => ConvertVmHelper.convertToOrderVm(o))
                 .ToListAsync();

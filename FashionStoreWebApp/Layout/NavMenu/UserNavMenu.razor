@@ -20,8 +20,8 @@
                                 <div class="header__top__hover">
                                     <span>Hi, @context.User.Identity?.Name <i class="fa-solid fa-caret-down"></i></span>
                                     <ul class="user-dropdown">
-                                        <li class="custom-dropdown-item">Orders</li>
-                                        <li class="custom-dropdown-item"  @onclick="Logout">Logout</li>
+                                        <li class="custom-dropdown-item" @onclick="GotoMyOrdersPage">My Orders</li>
+                                        <li class="custom-dropdown-item" @onclick="Logout">Logout</li>
                                     </ul>
                                 </div>
                             </Authorized>
@@ -96,5 +96,9 @@
     {
         await AccountManagementService.LogoutAsync();
         Navigation.NavigateTo("/", true);
+    }
+
+    private void GotoMyOrdersPage() {
+        Navigation.NavigateTo("/my-orders");
     }
 }

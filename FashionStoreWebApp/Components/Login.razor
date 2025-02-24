@@ -78,7 +78,7 @@
         {
             var authState = await AuthStateProvider.GetAuthenticationStateAsync();
             if (authState.User.IsInRole(RoleConstants.ROLE_ADMIN)) {
-                Navigation.NavigateTo("/brands", true);
+                Navigation.NavigateTo("/admin/brands", true);
             } else {
                 Navigation.NavigateTo("/", true);
             }

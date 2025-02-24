@@ -7,14 +7,6 @@
 
 @inject AuthenticationStateProvider AuthStateProvider
 
-<BlazoredToasts Position="ToastPosition.TopRight"
-                Timeout="ConstantValues.NOTIFY_TIME_OUT"
-                IconType="IconType.FontAwesome"
-                SuccessClass="success-toast-override"
-                SuccessIcon="fa fa-thumbs-up"
-                ErrorIcon="fa fa-bug" 
-                ShowProgressBar="true" />
-
 @if (isAdmin) {
     <div class="page d-flex">
         <div class="sidebar" style="width: 15%">

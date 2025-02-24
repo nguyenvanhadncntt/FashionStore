@@ -1,0 +1,85 @@
+﻿@page "/my-orders"
+@using FashionStoreViewModel;
+@using FashionStoreWebApp.Services;
+@using FashionStoreWebApp.Helpers;
+@using FashionStoreWebApp.Constants;
+@using FashionStoreViewModel.Enumerations;
+@using ChangeEventArgs = Microsoft.AspNetCore.Components.ChangeEventArgs;
+
+@attribute [Authorize(Roles = "User")]
+@inject IOrderService OrderService
+
+<!-- Breadcrumb Section Begin -->
+<section class="breadcrumb-option">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="breadcrumb__text">
+                    <h4>My Orders</h4>
+                    <div class="breadcrumb__links">
+                        <a href="/">Home</a>
+                        <a href="/search-product">Products</a>
+                        <span>My Orders</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Orders List -->
+<section class="shopping-cart spad">
+    @if (Orders == null || Orders.Count == 0)
+    {
+        <p class="text-center">No orders found.</p>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var order in Orders)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Order #@order.Id</h5>
+                            <p class="card-text"><strong>Total Amount:</strong>$ @order.TotalAmount</p>
+                            <p class="card-text"><strong>Status:</strong> <span class="badge text-white @(GetStatusBadgeClass(order.Status))">@order.Status</span></p>
+                            <p class="card-text"><strong>Payment Method:</strong> @order.PaymentMethod</p>
+                            <p class="card-text"><strong>Created At:</strong> @order.CreatedAt</p>
+                            <a href="/orders/@order.Id/detail" class="btn btn-primary mt-3">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</section>
+
+@code {
+    private IList<OrderVm> Orders = new List<OrderVm>();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOrders();
+    }
+
+    private async Task LoadOrders()
+    {
+        Orders = await OrderService.GetMyOrdersAsync(); // Fetch orders for the logged-in user
+        StateHasChanged();
+    }
+
+    private string GetStatusBadgeClass(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Created => "bg-primary",
+            OrderStatus.Pending => "bg-warning text-dark",
+            OrderStatus.Completed => "bg-success",
+            OrderStatus.Shipping => "bg-info",
+            OrderStatus.Cancelled => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+}

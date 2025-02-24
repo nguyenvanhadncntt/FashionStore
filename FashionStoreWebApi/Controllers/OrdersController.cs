@@ -46,9 +46,9 @@ namespace FashionStoreWebApi.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpGet]
-        public async Task<IActionResult> GetOrdersAsync([FromQuery] PagingRequest pagingRequest)
+        public async Task<IActionResult> GetOrdersAsync([FromQuery] string? name, [FromQuery] PagingRequest pagingRequest)
         {
-            var orders = await _orderService.GetOrdersAsync(pagingRequest);
+            var orders = await _orderService.GetOrdersAsync(name, pagingRequest);
             return Ok(orders);
         }
 
