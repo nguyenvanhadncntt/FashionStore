@@ -3,8 +3,6 @@ using FashionStoreWebApi.Identity;
 using FashionStoreWebApi.Models;
 using FashionStoreWebApi.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FashionStoreWebApp", "Fashi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FashionStoreViewModel", "FashionModel\FashionStoreViewModel.csproj", "{1D4CC4D1-EAE2-45EA-A988-56EF72EBA8CA}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{A0DE05B0-04CF-4E5D-A329-6B369C7679BD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FashionStoreWebApi.IntegrationTest", "FashionStoreWebApi.IntegrationTest\FashionStoreWebApi.IntegrationTest.csproj", "{50A4F16D-A84F-4AD6-AD0B-5C7F6161BCAB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,8 +31,15 @@ Global
 		{1D4CC4D1-EAE2-45EA-A988-56EF72EBA8CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D4CC4D1-EAE2-45EA-A988-56EF72EBA8CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D4CC4D1-EAE2-45EA-A988-56EF72EBA8CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50A4F16D-A84F-4AD6-AD0B-5C7F6161BCAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50A4F16D-A84F-4AD6-AD0B-5C7F6161BCAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50A4F16D-A84F-4AD6-AD0B-5C7F6161BCAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50A4F16D-A84F-4AD6-AD0B-5C7F6161BCAB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{50A4F16D-A84F-4AD6-AD0B-5C7F6161BCAB} = {A0DE05B0-04CF-4E5D-A329-6B369C7679BD}
 	EndGlobalSection
 EndGlobal
