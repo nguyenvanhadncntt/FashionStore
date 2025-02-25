@@ -20,8 +20,7 @@ namespace FashionStoreWebApi.Services
 
         public async Task<RoleVm> AddRoleAsync(string role)
         {
-            var roleDB = _roleManager.Roles.FirstOrDefault(r => r.Name == role);
-            if (roleDB == null)
+            if (!await _roleManager.RoleExistsAsync(role))
             {
                 Role newRole = new Role(role);
 

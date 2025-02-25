@@ -3,6 +3,7 @@ using FashionStoreWebApi.Data;
 using FashionStoreWebApi.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Data.Sqlite;
@@ -20,14 +21,14 @@ namespace FashionStoreWebApi.IntegrationTest
         {
             builder.ConfigureTestServices(services =>
             {
-                
 
-                //var connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=master;Database=FashionStoreDBTest;Trusted_Connection=True;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
+                var descriptor = services.SingleOrDefault(
+                    d => d.ServiceType == typeof(DbContextOptions<FashionStoreDbContext>));
 
-                //services.AddDbContext<FashionStoreDbContext>(options =>
-                //{
-                //    options.UseSqlServer(connectionString);
-                //});
+                if (descriptor != null)
+                {
+                    services.Remove(descriptor);
+                }
 
                 var dbContextDescriptor = services.SingleOrDefault(
                       d => d.ServiceType ==
@@ -48,8 +49,10 @@ namespace FashionStoreWebApi.IntegrationTest
                     var db = scopedServices.GetRequiredService<FashionStoreDbContext>();
                     db.Database.EnsureDeleted();
                     db.Database.EnsureCreated();
+
+                    var roleManager = scopedServices.GetRequiredService<RoleManager<Role>>();
                     //db.Database.Migrate();
-                    SeedingDataHelper.InitializeDB(db);
+                    SeedingDataHelper.InitializeDB(db, roleManager);
                 }
 
                 services.AddAuthentication("TestSchema")

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using FashionStoreWebApi.Helpers;
 using FashionStoreWebApi.Exceptions;
+using System.Data;
 
 namespace FashionStoreWebApi.Services
 {

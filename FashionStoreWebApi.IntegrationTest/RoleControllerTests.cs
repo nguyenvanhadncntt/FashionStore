@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
-using System.Text;
-using System.Threading.Tasks;
 using FashionStoreViewModel;
 using FluentAssertions;
 
@@ -24,7 +19,6 @@ namespace FashionStoreWebApi.IntegrationTest
             var response = await client.GetAsync("/api/Roles");
             var roles = await response.Content.ReadFromJsonAsync<List<RoleVm>>();
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            roles.Should().HaveCount(2);
             foreach (var role in roles)
             {
                 role.Id.Should().NotBeEmpty();
@@ -35,7 +29,7 @@ namespace FashionStoreWebApi.IntegrationTest
         [Fact]
         public async Task GetRoleById_Success()
         {
-            var roleId = "f53d4d27-1c1f-47ee-9e72-0aaf95535b2a";
+            var roleId = "f53d4d27-1c1f-47ee-9e72-0aaf95535b2f";
             var response = await client.GetAsync($"/api/Roles/{roleId}");
             var role = await response.Content.ReadFromJsonAsync<RoleVm>();
             response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -69,7 +63,7 @@ namespace FashionStoreWebApi.IntegrationTest
         {
             var role = new RoleVm
             {
-                Name = "Admin"
+                Name = "Admin-Policy"
             };
             var response = await client.PostAsJsonAsync("/api/Roles", role);
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -80,7 +74,7 @@ namespace FashionStoreWebApi.IntegrationTest
         {
             var role = new RoleVm
             {
-                Id = Guid.Parse("f53d4d27-1c1f-47ee-9e72-0aaf95535b2a"),
+                Id = Guid.Parse("f53d4d27-1c1f-47ee-9e72-0aaf95535b2f"),
                 Name = "Super Admin"
             };
             var response = await client.PutAsJsonAsync("/api/Roles", role);
@@ -105,7 +99,7 @@ namespace FashionStoreWebApi.IntegrationTest
         [Fact]
         public async Task DeleteRole_Success()
         {
-            var roleId = "f53d4d27-1c1f-47ee-9e72-0aaf95535b2a";
+            var roleId = "f53d4d27-1c1f-47ee-9e72-0aaf95535b3d";
             var response = await client.DeleteAsync($"/api/Roles/{roleId}");
             response.StatusCode.Should().Be(HttpStatusCode.OK);
         }

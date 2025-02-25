@@ -1,17 +1,20 @@
 ﻿using FashionStoreWebApi.Models;
 using FashionStoreWebApi.Data;
+using Microsoft.AspNetCore.Identity;
 
 namespace FashionStoreWebApi.IntegrationTest
 {
     public class SeedingDataHelper
     {
-        public static void InitializeDB(FashionStoreDbContext fashionStoreDb)
+        public static void InitializeDB(FashionStoreDbContext fashionStoreDb, RoleManager<Role> roleManager)
         {
             fashionStoreDb.Brands.AddRange(SeedBrands());
             fashionStoreDb.Categories.AddRange(SeedCategories());
             fashionStoreDb.Products.AddRange(SeedProducts());
             fashionStoreDb.Roles.AddRange(SeedRoles());
+            fashionStoreDb.Users.AddRange(SeedUsers());
             fashionStoreDb.SaveChanges();
+            AddRoles(roleManager);
         }
 
         private static IList<Brand> SeedBrands()
@@ -106,24 +109,71 @@ namespace FashionStoreWebApi.IntegrationTest
             return products;
         }
 
+        private static void AddRoles(RoleManager<Role> roleManager)
+        {
+            roleManager.CreateAsync(new Role("Admin-Policy")).Wait();
+            roleManager.CreateAsync(new Role("User-Policy")).Wait();
+            roleManager.CreateAsync(new Role("New-User-Policy")).Wait();
+        }
+
         private static IList<Role> SeedRoles()
         {
-            IList<Role> roles = new List<Role>
+            return new List<Role>()
             {
                 new Role
                 {
-                    Id = "f53d4d27-1c1f-47ee-9e72-0aaf95535b2a",
+                    Id = "f53d4d27-1c1f-47ee-9e72-0aaf95535b2f",
                     Name = "Admin"
                 },
                 new Role
                 {
-                    Id = "af3ff471-ee3b-4de1-a09a-2c1e7f33f917",
+                    Id = "af3ff471-ee3b-4de1-a09a-2c1e7f33f918",
                     Name = "User"
+                },
+                new Role
+                {
+                    Id = "f53d4d27-1c1f-47ee-9e72-0aaf95535b3d", 
+                    Name = "Super_User"
                 }
             };
-            return roles;
         }
 
+        private static IList<User> SeedUsers()
+        {
+            return new List<User>()
+            {
+                new User
+                {
+                    Id = "4578316a-c937-4fe0-85d2-1d4f488f3a58",
+                    Email = "admin@gmail.com",
+                    FirstName = "Admin",
+                    LastName = "Admin",
+                    UserName = "admin@gmail.com",
+                    PhoneNumber = "0123456789",
+                    PasswordHash = "AQAAAAEAACcQAAAAEJ9Zz5Z6"
+                },
+                new User
+                {
+                    Id = "7848f387-81a9-4757-91f4-f74e10d69f46",
+                    Email = "user@gmail.com",
+                    FirstName = "User",
+                    LastName = "User",
+                    UserName = "user@gmail.com",
+                    PhoneNumber = "0123456789",
+                    PasswordHash = "AQAAAA"
+                },
+                new User
+                {
+                    Id = "7848f387-81a9-4757-91f4-f74e10d69c15",
+                    Email = "superuser@gmail.com",
+                    FirstName = "Super",
+                    LastName = "User",
+                    UserName = "superuser@gmail.com",
+                    PhoneNumber = "0123456789",
+                    PasswordHash = "AQAAAACCCDDD"
+                }
+            };
+        }
 
-    }
+        }
 }
