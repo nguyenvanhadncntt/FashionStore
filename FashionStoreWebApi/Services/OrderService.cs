@@ -4,6 +4,7 @@ using FashionStoreWebApi.Models;
 using FashionStoreViewModel;
 using FashionStoreViewModel.Enumerations;
 using Microsoft.EntityFrameworkCore;
+using FashionStoreWebApi.Exceptions;
 
 namespace FashionStoreWebApi.Services
 {
@@ -78,13 +79,6 @@ namespace FashionStoreWebApi.Services
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
             }
-            //catch (DbUpdateConcurrencyException ex)
-            //{
-            //    foreach (var entry in ex.Entries)
-            //    {
-            //        entry.Reload(); // Reload the entity from the database
-            //    }
-            //}
             catch (Exception)
             {
                 await transaction.RollbackAsync();
@@ -100,11 +94,11 @@ namespace FashionStoreWebApi.Services
                 var product = products.FirstOrDefault(p => p.Id == orderItemVm.ProductId);
                 if (product == null)
                 {
-                    throw new Exception($"Product with id {orderItemVm.ProductId} not found");
+                    throw new EntityNotFoundException("Product", orderItemVm.ProductId);
                 }
                 if (product.StockQuantity < orderItemVm.Quantity)
                 {
-                    throw new Exception($"Product {product.Name} is out of stock");
+                    throw new QuantityOutOfStockException($"Product {product.Name} is out of stock");
                 }
             }
         }
@@ -134,7 +128,7 @@ namespace FashionStoreWebApi.Services
             var order = await _context.Orders.FindAsync(orderId);
             if (order == null)
             {
-                throw new Exception($"Order with id {orderId} not found");
+                throw new EntityNotFoundException("Order", orderId);
             }
             order.Status = status;
             await _context.SaveChangesAsync();
@@ -145,7 +139,7 @@ namespace FashionStoreWebApi.Services
             var order = await _context.Orders.FindAsync(orderId);
             if (order == null)
             {
-                throw new Exception($"Order with id {orderId} not found");
+                throw new EntityNotFoundException("Order", orderId);
             }
             order.PaymentStatus = status;
             await _context.SaveChangesAsync();
@@ -156,7 +150,7 @@ namespace FashionStoreWebApi.Services
             var order = await _context.Orders.FindAsync(orderId);
             if (order == null)
             {
-                throw new Exception($"Order with id {orderId} not found");
+                throw new EntityNotFoundException("Order", orderId);
             }
             _context.Orders.Remove(order);
             await _context.SaveChangesAsync();

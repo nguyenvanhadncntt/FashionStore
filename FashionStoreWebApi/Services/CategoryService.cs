@@ -3,6 +3,7 @@ using FashionStoreWebApi.Helpers;
 using FashionStoreWebApi.Models;
 using FashionStoreViewModel;
 using Microsoft.EntityFrameworkCore;
+using FashionStoreWebApi.Exceptions;
 
 namespace FashionStoreWebApi.Services
 {
@@ -40,7 +41,7 @@ namespace FashionStoreWebApi.Services
             var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == categoryId);
             if (category == null)
             {
-                throw new Exception("Category not found!");
+                throw new EntityNotFoundException("Category", categoryId);
             }
             return ConvertVmHelper.ConvertToCategoryVm(category);
         }
@@ -51,7 +52,7 @@ namespace FashionStoreWebApi.Services
             var category = await _context.Categories.FindAsync(categoryVm.Id);
             if (category == null)
             {
-                throw new Exception("Category not found!");
+                throw new EntityNotFoundException("Category", categoryVm.Id);
             }
 
             category.Name = categoryVm.Name;

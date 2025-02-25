@@ -14,19 +14,30 @@ using Microsoft.Extensions.Logging;
 
 namespace FashionStoreWebApi.IntegrationTest
 {
-    internal class FashionStoreWebApplicationFactory : WebApplicationFactory<Program>
+    public class FashionStoreWebApplicationFactory : WebApplicationFactory<Program>
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.ConfigureTestServices(services =>
             {
-                services.RemoveAll(typeof(DbContextOptions<FashionStoreDbContext>));
+                
 
-                var connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=master;Database=FashionStoreDBTest;Trusted_Connection=True;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
+                //var connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=master;Database=FashionStoreDBTest;Trusted_Connection=True;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
 
-                services.AddDbContext<FashionStoreDbContext>(options =>
+                //services.AddDbContext<FashionStoreDbContext>(options =>
+                //{
+                //    options.UseSqlServer(connectionString);
+                //});
+
+                var dbContextDescriptor = services.SingleOrDefault(
+                      d => d.ServiceType ==
+                      typeof(IDbContextOptionsConfiguration<FashionStoreDbContext>));
+
+                services.Remove(dbContextDescriptor);
+
+                services.AddDbContext<FashionStoreDbContext>((options, context) =>
                 {
-                    options.UseSqlServer(connectionString);
+                    context.UseInMemoryDatabase("InMemoryDbForTesting");
                 });
 
                 var sp = services.BuildServiceProvider();
@@ -35,9 +46,9 @@ namespace FashionStoreWebApi.IntegrationTest
                 {
                     var scopedServices = scope.ServiceProvider;
                     var db = scopedServices.GetRequiredService<FashionStoreDbContext>();
-
                     db.Database.EnsureDeleted();
-                    db.Database.Migrate();
+                    db.Database.EnsureCreated();
+                    //db.Database.Migrate();
                     SeedingDataHelper.InitializeDB(db);
                 }
 

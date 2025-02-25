@@ -1,4 +1,5 @@
 using FashionStoreWebApi.Data;
+using FashionStoreWebApi.Exceptions;
 using FashionStoreWebApi.Identity;
 using FashionStoreWebApi.Models;
 using FashionStoreWebApi.Services;
@@ -26,7 +27,10 @@ builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<GlobalExceptionFilter>();
+});
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
@@ -63,3 +67,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }

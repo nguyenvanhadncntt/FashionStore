@@ -3,6 +3,7 @@ using FashionStoreViewModel;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using FashionStoreWebApi.Helpers;
+using FashionStoreWebApi.Exceptions;
 
 namespace FashionStoreWebApi.Services
 {
@@ -25,7 +26,7 @@ namespace FashionStoreWebApi.Services
             // Check the role is existing
             if (!await _roleManager.RoleExistsAsync(userCreation.Role))
             {
-                throw new Exception("Role does not exist.");
+                throw new EntityNotFoundException($"Role with name {userCreation.Role} not found");
             }
 
             return await _userManager.AddToRoleAsync(user, userCreation.Role);
@@ -44,7 +45,7 @@ namespace FashionStoreWebApi.Services
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
-                throw new Exception("User not found.");
+                throw new EntityNotFoundException("User", userId);
 
             return new UserVm
             {
@@ -63,7 +64,7 @@ namespace FashionStoreWebApi.Services
             User? user = await _userManager.FindByIdAsync(userDto.Id);
             if (user == null)
             {
-                return IdentityResult.Failed(new IdentityError { Description = "User not found." });
+                throw new EntityNotFoundException("User", userDto.Id);
             }
             user.UserName = userDto.Email;
             user.Email = userDto.Email;
@@ -84,7 +85,7 @@ namespace FashionStoreWebApi.Services
 
                 if (!await _roleManager.RoleExistsAsync(userDto.Role))
                 {
-                    throw new Exception("Role does not exist.");
+                    throw new EntityNotFoundException($"Role with name {userDto.Role} not found");
                 }
 
                 var roles = await _userManager.GetRolesAsync(user);

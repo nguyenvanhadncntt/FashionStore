@@ -2,6 +2,7 @@
 using FashionStoreWebApi.Models;
 using FashionStoreViewModel;
 using Microsoft.EntityFrameworkCore;
+using FashionStoreWebApi.Exceptions;
 
 namespace FashionStoreWebApi.Services
 {
@@ -35,7 +36,7 @@ namespace FashionStoreWebApi.Services
                     };
                 } else
                 {
-                    throw new Exception("Product quanlity out of stock!");
+                    throw new QuantityOutOfStockException("Product quanlity out of stock!");
                 }
             }
 
@@ -94,7 +95,7 @@ namespace FashionStoreWebApi.Services
             }
             else
             {
-                throw new Exception("Product quanlity out of stock!");
+                throw new QuantityOutOfStockException("Product quanlity out of stock!");
             }
         }
 

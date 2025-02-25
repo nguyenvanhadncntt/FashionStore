@@ -31,7 +31,7 @@ namespace FashionStoreWebApi.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetRoles(string roleId)
         {
-            return Ok(await _roleService.GetRolesAsync());
+            return Ok(await _roleService.GetRoleVmById(roleId));
         }
 
         [HttpPost]

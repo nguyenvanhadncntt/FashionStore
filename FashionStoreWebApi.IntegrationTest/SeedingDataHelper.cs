@@ -16,6 +16,7 @@ namespace FashionStoreWebApi.IntegrationTest
 
         private static IList<Brand> SeedBrands()
         {
+
             IList<Brand> brands = new List<Brand>
             {
                 new Brand
@@ -111,10 +112,12 @@ namespace FashionStoreWebApi.IntegrationTest
             {
                 new Role
                 {
+                    Id = "f53d4d27-1c1f-47ee-9e72-0aaf95535b2a",
                     Name = "Admin"
                 },
                 new Role
                 {
+                    Id = "af3ff471-ee3b-4de1-a09a-2c1e7f33f917",
                     Name = "User"
                 }
             };

@@ -4,6 +4,7 @@ using FashionStoreWebApi.Models;
 using FashionStoreViewModel;
 using FashionStoreWebApi.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
+using FashionStoreWebApi.Exceptions;
 
 namespace FashionStoreWebApi.Services
 {
@@ -121,7 +122,7 @@ namespace FashionStoreWebApi.Services
 
             if (product == null)
             {
-                throw new Exception("Product not found");
+                throw new EntityNotFoundException("Product", productDto.Id);
             }
 
             product.Name = productDto.Name;

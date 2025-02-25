@@ -1,5 +1,6 @@
 ﻿using FashionStoreViewModel;
 using FashionStoreWebApi.Data;
+using FashionStoreWebApi.Exceptions;
 using FashionStoreWebApi.Helpers;
 using FashionStoreWebApi.Models;
 using Microsoft.EntityFrameworkCore;
@@ -60,20 +61,20 @@ namespace FashionStoreWebApi.Services
             var brand = await _context.Brands.FindAsync(brandId);
             if (brand == null)
             {
-                throw new Exception("Brand not found!");
+                throw new EntityNotFoundException("Brand", brandId);
             }
             return ConvertVmHelper.ConvertToBrandVm(brand);
         }
 
         // Update brand details
-        public async Task<BrandVm> UpdateBrandAsync(BrandVm brandVn)
+        public async Task<BrandVm> UpdateBrandAsync(BrandVm brandVm)
         {
-            var brand = await _context.Brands.FindAsync(brandVn.Id);
+            var brand = await _context.Brands.FindAsync(brandVm.Id);
             if (brand == null)
-                throw new Exception("Brand not found!");
+                throw new EntityNotFoundException("Brand", brandVm.Id);
 
-            brand.Name = brandVn.Name;
-            brand.Description = brandVn.Description;
+            brand.Name = brandVm.Name;
+            brand.Description = brandVm.Description;
 
             _context.Brands.Update(brand);
             await _context.SaveChangesAsync();

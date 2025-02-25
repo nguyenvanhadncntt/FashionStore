@@ -3,6 +3,7 @@ using FashionStoreWebApi.Models;
 using FashionStoreViewModel;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using FashionStoreWebApi.Exceptions;
 
 namespace FashionStoreWebApi.Services
 {
@@ -19,7 +20,8 @@ namespace FashionStoreWebApi.Services
 
         public async Task<RoleVm> AddRoleAsync(string role)
         {
-            if (!await _roleManager.RoleExistsAsync(role))
+            var roleDB = _roleManager.Roles.FirstOrDefault(r => r.Name == role);
+            if (roleDB == null)
             {
                 Role newRole = new Role(role);
 
@@ -28,7 +30,7 @@ namespace FashionStoreWebApi.Services
                 return new RoleVm { Id = Guid.Parse(newRole.Id), Name = newRole.Name };
             } else
             {
-                throw new Exception("Role already exists");
+                throw new EntityAlreadyExistingException($"Role name {role} already exists");
             }
         }
 
@@ -37,7 +39,7 @@ namespace FashionStoreWebApi.Services
             Role? role = await _roleManager.FindByIdAsync(roleId);
             if (role == null)
             {
-                throw new Exception("Role not found");
+                throw new EntityNotFoundException("Role", roleId);
             }
 
             IdentityResult result = await _roleManager.DeleteAsync(role);
@@ -56,7 +58,7 @@ namespace FashionStoreWebApi.Services
             Role? role = await _roleManager.FindByIdAsync(roleId);
             if (role == null)
             {
-                throw new Exception("Role not found");
+                throw new EntityNotFoundException("Role", roleId);
             }
             return new RoleVm { Id = Guid.Parse(role.Id), Name = role.Name };
         }
@@ -66,7 +68,7 @@ namespace FashionStoreWebApi.Services
             Role? role = await _roleManager.FindByIdAsync(roleVm.Id.ToString());
             if (role == null)
             {
-                throw new Exception("Role not found");
+                throw new EntityNotFoundException("Role", roleVm.Id);
             }
 
             role.Name = roleVm.Name;
