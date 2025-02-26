@@ -204,9 +204,14 @@
             var result = await BrandService.Delete(BrandToDelete.Id);
             if (result.Succeeded) {
                 ToastService.ShowSuccess($"Delete brand {BrandToDelete.Name} successfully !!!");
+                BrandToDelete = null;
+                await LoadBrands(); // Refresh the list after deletion
+            } else {
+                foreach (var error in result.ErrorList)
+                {
+                    ToastService.ShowError(error);
+                }
             }
-            BrandToDelete = null;
-            await LoadBrands(); // Refresh the list after deletion
         }
         closeModal(ModalType.Delete);
     }
@@ -233,6 +238,11 @@
             if (result.Succeeded)
             {
 				ToastService.ShowSuccess("Create new brand successfully !!!");
+            } else {
+                foreach (var error in result.ErrorList)
+                {
+                    ToastService.ShowError(error);
+                }
             }
         }
         else
@@ -240,8 +250,13 @@
             var result = await BrandService.UpdateBrandAsync(BrandSelected);
             if (result.Succeeded) {
                 ToastService.ShowSuccess($"Edit brand {BrandSelected.Name} successfully !!!");
+                BrandSelected = null;
+            } else {
+                foreach (var error in result.ErrorList)
+                {
+                    ToastService.ShowError(error);
+                }
             }
-            BrandSelected = null;
         }
         closeModal(ModalType.Edit);
         await LoadBrands();

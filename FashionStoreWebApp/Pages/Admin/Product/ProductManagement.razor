@@ -186,12 +186,12 @@
 
     private void GotoEditPage(ProductVm product)
 	{
-		Navigation.NavigateTo($"/products/edit/{product.Id}");
+		Navigation.NavigateTo($"/admin/products/edit/{product.Id}");
 	}
 
 	private void GoToCreateProductPage()
 	{
-		Navigation.NavigateTo("/products/edit/0");
+		Navigation.NavigateTo("/admin/products/edit/0");
 	}
 
     private void CloseDeleteModal()

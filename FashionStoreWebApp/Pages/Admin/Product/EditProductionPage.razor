@@ -173,17 +173,35 @@
         if (Product.Id != 0)
         {
             content.Add(new StringContent(Product.Id.ToString()), "Id");
-            await ProductService.UpdateProductAsync(content);
-			ToastService.ShowSuccess("Product updated successfully.");
-            Navigation.NavigateTo("/products");
+            var result = await ProductService.UpdateProductAsync(content);
+            if (result.Succeeded) {
+                ToastService.ShowSuccess("Product updated successfully.");
+                Navigation.NavigateTo("/admin/products");
+            }
+            else
+            {
+                foreach (var error in result.ErrorList)
+                {
+                    ToastService.ShowError(error);
+                }
+            }
 		}
 		else
 		{
-            await ProductService.CreateProductAsync(content);
-            ToastService.ShowSuccess("Product created successfully.");
-            Navigation.NavigateTo("/products");
+            var result = await ProductService.CreateProductAsync(content);
+            if (result.Succeeded)
+            {
+                ToastService.ShowSuccess("Product created successfully.");
+                Navigation.NavigateTo("/admin/products");
+            }
+            else
+            {
+                foreach (var error in result.ErrorList)
+                {
+                    ToastService.ShowError(error);
+                }
+            }
         }
-
     }
 
     private void Cancel()

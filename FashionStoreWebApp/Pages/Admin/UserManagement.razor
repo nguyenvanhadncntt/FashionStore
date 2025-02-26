@@ -275,9 +275,13 @@
             if (result.Succeeded)
             {
                 ToastService.ShowSuccess($"Delete User {UserToDelete?.FirstName + " " + UserToDelete?.LastName} successfully !!!");
+                UserToDelete = null;
+                await LoadUsers(); // Refresh the list after deletion
+            } else {
+                foreach(var error in result.ErrorList) {
+                    ToastService.ShowError(error);
+                }
             }
-            UserToDelete = null;
-            await LoadUsers(); // Refresh the list after deletion
         }
         closeModal(ModalType.Delete);
     }
@@ -304,6 +308,11 @@
             if (result.Succeeded)
             {
                 ToastService.ShowSuccess("Create new user successfully !!!");
+            } else {
+                foreach (var error in result.ErrorList)
+                {
+                    ToastService.ShowError(error);
+                }
             }
         }
         else
@@ -312,8 +321,13 @@
             if (result.Succeeded)
             {
                 ToastService.ShowSuccess($"Edit User {UserCreation.Email} successfully !!!");
+                UserCreation = null;
+            } else {
+                foreach (var error in result.ErrorList)
+                {
+                    ToastService.ShowError(error);
+                }
             }
-            UserCreation = null;
         }
         closeModal(ModalType.Edit);
         await LoadUsers();

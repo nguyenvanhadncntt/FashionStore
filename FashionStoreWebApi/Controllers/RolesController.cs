@@ -21,35 +21,30 @@ namespace FashionStoreWebApi.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetRoles()
         {
             return Ok(await _roleService.GetRolesAsync());
         }
 
         [HttpGet("{roleId}")]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetRoles(string roleId)
         {
             return Ok(await _roleService.GetRoleVmById(roleId));
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddRole([FromBody] RoleVm role)
         {
             return Ok(await _roleService.AddRoleAsync(role.Name));
         }
 
         [HttpPut]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateRole([FromBody] RoleVm roleVm)
         {
             return Ok(await _roleService.UpdateRole(roleVm));
         }
 
         [HttpDelete("{roleId}")]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteRole(String roleId)
         {
             return Ok(await _roleService.deleteRole(roleId));

@@ -26,7 +26,7 @@ namespace FashionStoreWebApi.Services
 
                 await _roleManager.CreateAsync(newRole);
 
-                return new RoleVm { Id = Guid.Parse(newRole.Id), Name = newRole.Name };
+                return new RoleVm { Id = newRole.Id, Name = newRole.Name };
             } else
             {
                 throw new EntityAlreadyExistingException($"Role name {role} already exists");
@@ -48,7 +48,7 @@ namespace FashionStoreWebApi.Services
         public Task<List<RoleVm>> GetRolesAsync()
         {
             return _roleManager.Roles.Select(r =>
-                new RoleVm { Id = Guid.Parse(r.Id), Name = r.Name })
+                new RoleVm { Id = r.Id, Name = r.Name })
                 .ToListAsync();
         }
 
@@ -59,7 +59,7 @@ namespace FashionStoreWebApi.Services
             {
                 throw new EntityNotFoundException("Role", roleId);
             }
-            return new RoleVm { Id = Guid.Parse(role.Id), Name = role.Name };
+            return new RoleVm { Id = role.Id, Name = role.Name };
         }
 
         public async Task<RoleVm> UpdateRole(RoleVm roleVm)
@@ -74,7 +74,7 @@ namespace FashionStoreWebApi.Services
 
             await _roleManager.UpdateAsync(role);
 
-            return new RoleVm { Id = Guid.Parse(role.Id), Name = role.Name };
+            return new RoleVm { Id = role.Id, Name = role.Name };
 
         }
     }

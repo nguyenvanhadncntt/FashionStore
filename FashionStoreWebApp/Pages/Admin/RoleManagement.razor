@@ -73,7 +73,7 @@
             <EditForm id="editRoleForm" Model="RoleSelected" OnValidSubmit="SaveRole">
                 <ChildContent Context="formContext">
                     <div class="modal-header">
-                        <h5 class="modal-title">@(RoleSelected.Id.ToString() == null ? "Add New Role" : $"Edit Role {RoleSelected.Name}")</h5>
+                        <h5 class="modal-title">@(RoleSelected.Id == null ? "Add New Role" : $"Edit Role {RoleSelected.Name}")</h5>
                     </div>
                     <div class="modal-body">
                         <DataAnnotationsValidator />
@@ -137,9 +137,14 @@
             if (result.Succeeded)
             {
                 ToastService.ShowSuccess($"Delete Role {RoleToDelete.Name} successfully !!!");
+                RoleToDelete = null;
+                await LoadRoles(); // Refresh the list after deletion
+            } else {
+                foreach (var error in result.ErrorList)
+                {
+                    ToastService.ShowError(error);
+                }
             }
-            RoleToDelete = null;
-            await LoadRoles(); // Refresh the list after deletion
         }
         closeModal(ModalType.Delete);
     }
@@ -160,22 +165,33 @@
 
     private async Task SaveRole()
     {
-        if (RoleSelected.Id.ToString() != null)
-        {
-            var result = await RoleService.AddRoleAsync(RoleSelected.Name);
-            if (result.Succeeded)
-            {
-                ToastService.ShowSuccess("Create new Role successfully !!!");
-            }
-        }
-        else
+        if (RoleSelected.Id != null)
         {
             var result = await RoleService.UpdateRole(RoleSelected);
             if (result.Succeeded)
             {
                 ToastService.ShowSuccess($"Edit Role {RoleSelected.Name} successfully !!!");
+                RoleSelected = null;
             }
-            RoleSelected = null;
+            else
+            {
+                foreach (var error in result.ErrorList)
+                {
+                    ToastService.ShowError(error);
+                }
+            }
+        }
+        else
+        {
+            var result = await RoleService.AddRoleAsync(RoleSelected.Name);
+            if (result.Succeeded)
+            {
+                ToastService.ShowSuccess("Create new Role successfully !!!");
+            } else {
+                foreach (var error in result.ErrorList) {
+                    ToastService.ShowError(error);
+                }
+            }
         }
         closeModal(ModalType.Edit);
         await LoadRoles();

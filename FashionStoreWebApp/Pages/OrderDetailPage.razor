@@ -171,9 +171,17 @@ else
     {
         if (Order != null)
         {
-            await OrderService.UpdateOrderStatusAsync(Order.Id, Order.Status);
-            ToastService.ShowSuccess("Update Status order successfully!");
-            GoBack(); // Redirect back to the order list
+            var result = await OrderService.UpdateOrderStatusAsync(Order.Id, Order.Status);
+            if (result.Succeeded) {
+                ToastService.ShowSuccess("Update Status order successfully!");
+                GoBack(); // Redirect back to the order list
+            } else {
+                foreach (var error in result.ErrorList)
+                {
+                    ToastService.ShowError(error);
+                }
+            }
+
         }
     }
 

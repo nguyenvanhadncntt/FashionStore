@@ -224,8 +224,8 @@
     private bool isPriceAscSort = true;
 
     private IList<BrandVm> Brands = new List<BrandVm>();
-	private IList<CategoryVm> Categories = new List<CategoryVm>();
-	
+    private IList<CategoryVm> Categories = new List<CategoryVm>();
+
     private PagingData<ProductVm> PagingProducts = new PagingData<ProductVm>([], ConstantValues.ZERO, ConstantValues.FIRST_PAGE, 9);
 
     private int[] PagingNumbers = ConstantValues.PAGING_NUMBERS_DEFAULT;
@@ -235,7 +235,7 @@
     {
         AuthState = await AuthStateProvider.GetAuthenticationStateAsync();
         await FetchCategories();
-		await FetchBrands();
+        await FetchBrands();
         await FetchProducts();
     }
 
@@ -246,6 +246,7 @@
                 categoryId = CategoryIdSelected,
 				brandId = BrandIdSelected
         }, CurrentPage, PageSize, "Price", isPriceAscSort);
+        GeneratePageNumberItems();
         StateHasChanged();
     }
 

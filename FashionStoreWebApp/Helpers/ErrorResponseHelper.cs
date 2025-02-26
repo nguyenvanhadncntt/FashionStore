@@ -9,23 +9,28 @@ namespace FashionStoreWebApp.Helpers
         public static IList<string> GetErrorMsgFromResponse(string json)
         {
             var errors = new List<string>();
-            var details = json;
-            var problemDetails = JsonDocument.Parse(details);
-            var errorList = problemDetails.RootElement.GetProperty("errors");
+            var problemDetails = JsonDocument.Parse(json);
 
-            foreach (var errorEntry in errorList.EnumerateObject())
+            if (problemDetails.RootElement.TryGetProperty("errors", out var errorList))
             {
-                if (errorEntry.Value.ValueKind == JsonValueKind.String)
+                foreach (var errorEntry in errorList.EnumerateObject())
                 {
-                    errors.Add(errorEntry.Value.GetString()!);
+                    if (errorEntry.Value.ValueKind == JsonValueKind.String)
+                    {
+                        errors.Add(errorEntry.Value.GetString()!);
+                    }
+                    else if (errorEntry.Value.ValueKind == JsonValueKind.Array)
+                    {
+                        errors.AddRange(
+                            errorEntry.Value.EnumerateArray().Select(
+                                e => e.GetString() ?? string.Empty)
+                            .Where(e => !string.IsNullOrEmpty(e)));
+                    }
                 }
-                else if (errorEntry.Value.ValueKind == JsonValueKind.Array)
-                {
-                    errors.AddRange(
-                        errorEntry.Value.EnumerateArray().Select(
-                            e => e.GetString() ?? string.Empty)
-                        .Where(e => !string.IsNullOrEmpty(e)));
-                }
+            } else
+            {
+                var msgError = problemDetails.RootElement.GetProperty("message");
+                errors.Add(msgError.GetString()!);
             }
 
             return errors;

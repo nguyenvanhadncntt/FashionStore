@@ -74,7 +74,7 @@ namespace FashionStoreWebApi.IntegrationTest
         {
             var role = new RoleVm
             {
-                Id = Guid.Parse("f53d4d27-1c1f-47ee-9e72-0aaf95535b2f"),
+                Id = "f53d4d27-1c1f-47ee-9e72-0aaf95535b2f",
                 Name = "Super Admin"
             };
             var response = await client.PutAsJsonAsync("/api/Roles", role);
@@ -89,7 +89,7 @@ namespace FashionStoreWebApi.IntegrationTest
         {
             var role = new RoleVm
             {
-                Id = Guid.Parse("f53d4d27-1c1f-47ee-9e72-0aaf95535b2c"),
+                Id = "f53d4d27-1c1f-47ee-9e72-0aaf95535b2c",
                 Name = "Super Admin"
             };
             var response = await client.PutAsJsonAsync("/api/Roles", role);

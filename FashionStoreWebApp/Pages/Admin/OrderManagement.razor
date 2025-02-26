@@ -7,9 +7,10 @@
 @using ChangeEventArgs = Microsoft.AspNetCore.Components.ChangeEventArgs;
 
 @attribute [Authorize(Roles = "Admin")]
-@inject IOrderService OrderService
-@inject IJSRuntime JSRuntime
-@inject NavigationManager NavigationManager
+@inject IOrderService OrderService;
+@inject IJSRuntime JSRuntime;
+@inject NavigationManager NavigationManager;
+@inject IToastService ToastService;
 
 <h3 class="my-4">Order Management</h3>
 
@@ -127,8 +128,16 @@
         bool confirm = await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to CANCELLATION this order?");
         if (confirm)
         {
-            await OrderService.UpdateOrderStatusAsync(orderId, OrderStatus.Cancelled);
-            await LoadOrders();
+            var result = await OrderService.UpdateOrderStatusAsync(orderId, OrderStatus.Cancelled);
+            if (result.Succeeded) {
+                ToastService.ShowSuccess("Cancellation Order Successfully!!");
+                await LoadOrders();
+            } else {
+                foreach (var error in result.ErrorList)
+                {
+                    ToastService.ShowError(error);
+                }
+            }
         }
     }
 
