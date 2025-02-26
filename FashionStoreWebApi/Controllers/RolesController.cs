@@ -35,12 +35,16 @@ namespace FashionStoreWebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> AddRole([FromBody] RoleVm role)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             return Ok(await _roleService.AddRoleAsync(role.Name));
         }
 
         [HttpPut]
         public async Task<IActionResult> UpdateRole([FromBody] RoleVm roleVm)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             return Ok(await _roleService.UpdateRole(roleVm));
         }
 

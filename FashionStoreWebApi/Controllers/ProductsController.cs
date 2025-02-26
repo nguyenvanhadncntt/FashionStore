@@ -34,6 +34,8 @@ namespace FashionStoreWebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateProduct([FromForm] ProductCreationDTO productDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             return Ok(await _productService.createProductAsync(productDto));
         }
 
@@ -41,6 +43,8 @@ namespace FashionStoreWebApi.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateProduct([FromForm] ProductCreationDTO productDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             return Ok(await _productService.UpdateProduct(productDto));
         }
 

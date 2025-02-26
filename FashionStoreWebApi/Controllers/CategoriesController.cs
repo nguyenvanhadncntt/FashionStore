@@ -21,6 +21,8 @@ namespace FashionStoreWebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateCategory([FromBody] CategoryVm category)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             return Ok(await _categoryService.CreateCategoryAsync(category));
         }
 
@@ -35,6 +37,8 @@ namespace FashionStoreWebApi.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateCategory([FromBody] CategoryVm updatedCategory)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             return Ok(await _categoryService.UpdateCategoryAsync(updatedCategory));
         }
 

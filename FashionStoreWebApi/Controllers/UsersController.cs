@@ -40,6 +40,8 @@ namespace FashionStoreWebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] UserCreationDTO userCreation)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             return Ok(await _userService.CreateUserAsync(userCreation));
         }
 
@@ -47,6 +49,8 @@ namespace FashionStoreWebApi.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateUser([FromBody] UserCreationDTO userCreation)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             return Ok(await _userService.UpdateUserAsync(userCreation));
         }
 

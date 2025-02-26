@@ -34,6 +34,8 @@ namespace FashionStoreWebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateBrand([FromBody] BrandVm brandVm)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             return Ok(await _brandService.CreateBrandAsync(brandVm));
         }
 
@@ -41,6 +43,8 @@ namespace FashionStoreWebApi.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateBrand([FromBody] BrandVm brandVm)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             return Ok(await _brandService.UpdateBrandAsync(brandVm));
         }
 
