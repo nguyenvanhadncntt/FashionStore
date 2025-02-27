@@ -3,6 +3,7 @@ using FashionStoreWebApi.Exceptions;
 using FashionStoreWebApi.Identity;
 using FashionStoreWebApi.Models;
 using FashionStoreWebApi.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -54,6 +55,13 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.UseSwaggerUI(option => option.SwaggerEndpoint("/openapi/v1.json", "Fashion Store Web API"));
     app.MapSwagger().RequireAuthorization();
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+    await DataSeeder.SeedAsync(roleManager, userManager);
 }
 
 app.UseStaticFiles();
